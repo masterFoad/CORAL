@@ -303,7 +303,7 @@ a:hover{color:var(--link-h)}
   <!-- TL;DR -->
   <div class="tldr">
     <div class="tldr-body">
-      <strong>TL;DR —</strong> Coral is an autonomous infrastructure for self-evolving agents, replacing rigid, hardcoded constraints with long-running exploration, reflection, and collaboration. Compared with structured evolutionary search, Coral achieves a <strong>2.5× higher improvement rate</strong> and <strong>10× faster evolution</strong> on the Erdős Minimum Overlap problem using the same model, achieving a <strong>SOTA score of 0.38078</strong>. On Anthropic’s kernel benchmark, four agents push the best known score from <strong>1363 to 1103 cycles</strong>. Together, these results suggest that <strong>giving agents more autonomy</strong> and <strong>enabling multiple agents to improve together</strong> can unlock substantially stronger performance.
+      <strong>TL;DR —</strong> Coral is an autonomous infrastructure for self-evolving agents, replacing rigid, hardcoded constraints with long-running exploration, reflection, and collaboration. Compared with structured evolutionary search, Coral achieves a <strong>2.5× higher improvement rate</strong> and <strong>10× faster evolution</strong> on the Erdős Minimum Overlap problem using the same model, outperforming the score achieved by AlphaEvolve. On Anthropic’s kernel benchmark, four agents push the best known score from <strong>1363 to 1103 cycles</strong>. Together, these results suggest that <strong>giving agents more autonomy</strong> and <strong>enabling multiple agents to improve together</strong> can unlock substantially stronger performance.
     </div>
   </div>
 </div>
@@ -486,12 +486,7 @@ a:hover{color:var(--link-h)}
       <strong><span style="color:#E8A09A">CORAL</span></strong> achieves SOTA solution quality while substantially improving evolution efficiency. <strong><span style="color:#E8A09A">CORAL</span></strong> (without web-search) finds a solution that scores C₅ = 0.38089, outperforming the best reported AI solution of C₅ = 0.38092 by AlphaEvolve (and OpenEvolve's C₅ = 0.38111). More importantly, <strong><span style="color:#E8A09A">CORAL</span></strong> required much fewer evaluations and converges significantly faster, reaching 99% of AlphaEvolve's score in just 34 minutes compared to the 5.2 hours that OpenEvolve takes under the same setup, and with less than half the cost.
     </p>
     <p>
-      Giving agents access to web-search further improves both performance and convergence speed, resulting in a score of C₅ = <strong>0.38078</strong> (which we think is the new SOTA for the Erdős Minimum Overlap Problem). With external knowledge retrieval, <strong><span style="color:#E8A09A">CORAL</span></strong> discovers relevant mathematical techniques from the latest literature and incorporates them during the search process, reaching near-optimal solutions in as little as 6 minutes with half the cost. These results highlight how exploration combined with dynamic knowledge retrieval can substantially accelerate evolution progress. We release the final solution at <a href="https://github.com/Human-Agent-Society/CORAL/blob/main/demos/solution_erdos.py">solution_erdos.py</a>.
-    </p>
-
-    <p>
-      Given that Coral is tentatively a pure agentic infrastructure, it is
-       exciting to imagine what will happen if we combine previous achievements utilizing online/test-time model training in evolution (e.g., <a href="https://arxiv.org/abs/2601.16175">TTT-Discover</a> and <a href="https://arxiv.org/abs/2603.10165">OpenClaw-RL</a>) with the Coral infrastrcture. We discuss more about our outlook towards the end of this blog post.
+      Giving agents access to web search further improves both performance and convergence speed. <strong><span style="color:#E8A09A">CORAL</span></strong> discovers the best-known solution <a href="https://github.com/togethercomputer/EinsteinArena-new-SOTA">released by together.ai</a> and further optimizes it, improving the result from C₅ = 0.380871 to C₅ = 0.3808703. We do not believe this improvement was beyond together.ai’s reach, but we are sharing the result <a href="https://github.com/Human-Agent-Society/CORAL/blob/readme/demos/solution_erdos.py">here</a> for completeness. At this stage, we do not think this problem still offers meaningful room for improvement for the most advanced agents, but it does illustrate how autonomous agents can quickly build on strong existing baselines and make further progress.
     </p>
 
     <!-- ML Engineering -->
@@ -597,6 +592,7 @@ a:hover{color:var(--link-h)}
     <p>
       If single agents can evolve, organized <strong>populations of agents</strong> hold great promise to become even more powerful as evidenced by our experiments on the Anthropic take-home task. In our experiments, single agents often became stuck, whereas multiple agents were better able to explore diverse options. But such horizontal scaling raises many open questions: What is the right organizational size? How should agents communicate, how often, and at what level of abstraction? What information should be shared, and what should be retained by each agent? These are not just engineering choices, but organizational principles for machine intelligence.
     </p>
+    <p>Additionally, we observe that without the heartbeat mechanism, agents become significantly less effective at sharing information and contributing reusable skills to one another. This suggests that training agents to natively operate and thrive in multi-agent settings may be an especially exciting frontier for future research.</p>
     <p><strong>Key Enablers:</strong> Effective role delegation · Communication mechanisms · Curation and growth of shared memory and transferable skills</p>
     <p><strong>Exemplary initial attempts:</strong> <a href="https://github.com/mutable-state-inc/autoresearch-at-home">mutable-state-inc/autoresearch-at-home</a> · <a href="#kernel">our Anthropic Performance Take-Home experiments</a></p>
 
