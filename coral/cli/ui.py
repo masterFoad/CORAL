@@ -103,7 +103,7 @@ def _ensure_ui_deps() -> None:
         print("[coral] UI dependencies installed.")
 
 
-def start_ui_background(coral_dir: Path, port: int = 8420, host: str = "127.0.0.1") -> None:
+def start_ui_background(coral_dir: Path, port: int = 8420, host: str = "0.0.0.0") -> None:
     """Start the web dashboard in a background thread."""
     _ensure_ui_deps()
     try:

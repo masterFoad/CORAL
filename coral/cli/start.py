@@ -139,7 +139,7 @@ def _ensure_docker_image(config: CoralConfig) -> str:
         sys.exit(1)
     print(f"Building Docker image '{image}' ...")
     result = subprocess.run(
-        ["sudo", "docker", "build", "-f", str(dockerfile), "-t", image, "."],
+        ["docker", "build", "-f", str(dockerfile), "-t", image, "."],
         cwd=str(coral_pkg),
     )
     if result.returncode != 0:
@@ -159,11 +159,17 @@ def _build_docker_cmd(
 ) -> list[str]:
     """Build the `docker run` command with standard mounts and env vars."""
     cmd: list[str] = [
-        "sudo", "docker", "run", "-d",
-        "--name", container_name,
-        "-v", f"{config_dir}:/task:ro",
-        "-v", f"{host_run_dir}:/app/run:rw",
-        "-v", f"{repo_path}:/repo:rw",
+        "docker",
+        "run",
+        "-d",
+        "--name",
+        container_name,
+        "-v",
+        f"{config_dir}:/task:ro",
+        "-v",
+        f"{host_run_dir}:/app/run:rw",
+        "-v",
+        f"{repo_path}:/repo:rw",
     ]
 
     # Mount runtime-specific credentials
@@ -253,10 +259,16 @@ def _start_in_docker(args: argparse.Namespace, config: CoralConfig) -> None:
         config=config,
         image=image,
     )
-    docker_cmd.extend([
-        "start", "--config", f"/task/{config_path.name}",
-        "workspace.run_dir=/app/run", "workspace.repo_path=/repo", "run.session=local",
-    ])
+    docker_cmd.extend(
+        [
+            "start",
+            "--config",
+            f"/task/{config_path.name}",
+            "workspace.run_dir=/app/run",
+            "workspace.repo_path=/repo",
+            "run.session=local",
+        ]
+    )
     docker_cmd.extend(getattr(args, "overrides", []))
 
     _run_docker_container(docker_cmd, container_name)
@@ -455,11 +467,13 @@ def _resume_in_docker(args: argparse.Namespace, config: CoralConfig, coral_dir: 
     config_dir_file = host_run_dir / ".coral_host_config_dir"
     repo_path_file = host_run_dir / ".coral_host_repo_path"
     config_dir = (
-        Path(config_dir_file.read_text().strip()) if config_dir_file.exists()
+        Path(config_dir_file.read_text().strip())
+        if config_dir_file.exists()
         else Path(config.task_dir or Path.cwd()).resolve()
     )
     repo_path = (
-        Path(repo_path_file.read_text().strip()) if repo_path_file.exists()
+        Path(repo_path_file.read_text().strip())
+        if repo_path_file.exists()
         else Path(config.workspace.repo_path).resolve()
     )
 
@@ -471,10 +485,14 @@ def _resume_in_docker(args: argparse.Namespace, config: CoralConfig, coral_dir: 
         config=config,
         image=image,
     )
-    docker_cmd.extend([
-        "resume",
-        "workspace.run_dir=/app/run", "workspace.repo_path=/repo", "run.session=local",
-    ])
+    docker_cmd.extend(
+        [
+            "resume",
+            "workspace.run_dir=/app/run",
+            "workspace.repo_path=/repo",
+            "run.session=local",
+        ]
+    )
     instruction = getattr(args, "instruction", None)
     if instruction:
         docker_cmd.extend(["--instruction", instruction])

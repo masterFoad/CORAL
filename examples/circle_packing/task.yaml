@@ -39,13 +39,12 @@ grader:
     program_file: "initial_program.py"
 
 agents:
-  count: 1
+  count: 2
+  max_turns: 5
   runtime: opencode
-  model: claude/claude-opus-4-6  # to be consistent with ./seed/opencode.json
+  model: gemini/gemini-3.1-pro-preview  # to be consistent with ./seed/opencode.json
   gateway:
-    enabled: true
-    port: 4000  # to be consistent with ./seed/opencode.json
-    config: "./litellm_config.yaml"
+    enabled: false
 
 workspace:
   results_dir: "./results"
@@ -55,5 +54,5 @@ workspace:
 
 run:
   verbose: false
-  ui: false
+  ui: true
   session: docker

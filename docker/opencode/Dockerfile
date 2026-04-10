@@ -24,6 +24,7 @@ RUN npm install -g opencode-ai@latest
 WORKDIR /app
 COPY pyproject.toml uv.lock* README* ./
 COPY coral/ coral/
+ENV SETUPTOOLS_SCM_PRETEND_VERSION=0.1.0
 RUN uv sync --no-dev
 ENV PATH="/app/.venv/bin:$PATH"
 

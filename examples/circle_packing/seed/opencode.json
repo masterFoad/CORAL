@@ -15,18 +15,27 @@
       "skill": "allow"
     },
     "provider": {
-      "claude": {
-        "npm": "@ai-sdk/anthropic",
-        "name": "claude",
-        "options": {
-          "baseURL": "http://localhost:4000/v1",
-          "apiKey": "xxx"
-        },
+      "gemini": {
+        "npm": "@ai-sdk/google",
+        "name": "google",
         "models": {
-          "claude-opus-4-6": {
-            "name": "claude-opus-4-6"
+          "gemini-3.1-pro-preview": {
+            "name": "gemini-3.1-pro-preview"
+          },
+          "gemini-3-flash-preview": {
+            "name": "gemini-3-flash-preview"
           }
         }
+      }
+    },
+    "model": "gemini/gemini-3.1-pro-preview",
+    "small_model": "gemini/gemini-3-flash-preview",
+    "agent": {
+      "explore": {
+        "model": "gemini/gemini-3-flash-preview"
+      },
+      "general": {
+        "model": "gemini/gemini-3-flash-preview"
       }
     }
   }
