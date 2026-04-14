@@ -73,9 +73,11 @@ class GatewayManager:
 
         loop = asyncio.new_event_loop()
         try:
-            loop.run_until_complete(initialize(
-                config=self.config_path,
-            ))
+            loop.run_until_complete(
+                initialize(
+                    config=self.config_path,
+                )
+            )
         finally:
             loop.close()
 
@@ -156,6 +158,5 @@ class GatewayManager:
                 pass
             time.sleep(HEALTH_CHECK_INTERVAL)
         raise RuntimeError(
-            f"Gateway did not become healthy within "
-            f"{HEALTH_CHECK_TIMEOUT}s on port {self.port}."
+            f"Gateway did not become healthy within {HEALTH_CHECK_TIMEOUT}s on port {self.port}."
         )

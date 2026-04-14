@@ -32,9 +32,21 @@ def _git_init(d: str) -> None:
     """Initialise a git repo with a dummy commit (works without global config)."""
     subprocess.run(["git", "init", d], capture_output=True, check=True)
     subprocess.run(
-        ["git", "-C", d, "-c", "user.name=test", "-c", "user.email=test@test.com",
-         "commit", "--allow-empty", "-m", "init"],
-        capture_output=True, check=True,
+        [
+            "git",
+            "-C",
+            d,
+            "-c",
+            "user.name=test",
+            "-c",
+            "user.email=test@test.com",
+            "commit",
+            "--allow-empty",
+            "-m",
+            "init",
+        ],
+        capture_output=True,
+        check=True,
     )
 
 
@@ -73,6 +85,7 @@ def test_create_project_unique_runs():
         paths1 = create_project(config)
 
         import time
+
         time.sleep(1.1)  # ensure different timestamp
 
         paths2 = create_project(config)
@@ -158,13 +171,14 @@ def test_create_project_setup_runs_sequentially():
         worktree = Path(d) / "worktree"
         worktree.mkdir()
 
-        setup_worktree_env(worktree, [
-            "mkdir -p mydir",
-            "echo done > mydir/result.txt",
-        ])
+        setup_worktree_env(
+            worktree,
+            [
+                "mkdir -p mydir",
+                "echo done > mydir/result.txt",
+            ],
+        )
 
         result_file = worktree / "mydir" / "result.txt"
         assert result_file.exists()
         assert result_file.read_text().strip() == "done"
-
-

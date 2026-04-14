@@ -24,7 +24,9 @@ def _git_add_and_commit(message: str, workdir: str) -> str:
     # Stage all changes
     result = subprocess.run(
         ["git", "add", "-A"],
-        capture_output=True, text=True, cwd=workdir,
+        capture_output=True,
+        text=True,
+        cwd=workdir,
     )
     if result.returncode != 0:
         raise RuntimeError(f"git add failed: {result.stderr}")
@@ -32,7 +34,8 @@ def _git_add_and_commit(message: str, workdir: str) -> str:
     # Check if there's anything to commit
     status = subprocess.run(
         ["git", "diff", "--cached", "--quiet"],
-        capture_output=True, cwd=workdir,
+        capture_output=True,
+        cwd=workdir,
     )
     if status.returncode == 0:
         raise RuntimeError("Nothing to commit — no changes detected.")
@@ -40,7 +43,9 @@ def _git_add_and_commit(message: str, workdir: str) -> str:
     # Commit
     result = subprocess.run(
         ["git", "commit", "-m", message],
-        capture_output=True, text=True, cwd=workdir,
+        capture_output=True,
+        text=True,
+        cwd=workdir,
     )
     if result.returncode != 0:
         raise RuntimeError(f"git commit failed: {result.stderr}")
@@ -48,7 +53,9 @@ def _git_add_and_commit(message: str, workdir: str) -> str:
     # Get the commit hash
     result = subprocess.run(
         ["git", "rev-parse", "HEAD"],
-        capture_output=True, text=True, cwd=workdir,
+        capture_output=True,
+        text=True,
+        cwd=workdir,
     )
     return result.stdout.strip()
 
@@ -57,7 +64,9 @@ def _get_parent_hash(commit_hash: str, cwd: str) -> str | None:
     """Get the parent commit hash."""
     result = subprocess.run(
         ["git", "log", "--format=%P", "-n", "1", commit_hash],
-        capture_output=True, text=True, cwd=cwd,
+        capture_output=True,
+        text=True,
+        cwd=cwd,
     )
     if result.returncode == 0 and result.stdout.strip():
         return result.stdout.strip().split()[0]
@@ -85,6 +94,7 @@ def _grader_worker(config_path: str, coral_dir: str, codebase_path: str, tasks: 
     dynamically-imported modules across process boundaries.
     """
     import asyncio
+
     try:
         config = CoralConfig.from_yaml(config_path)
         grader = load_grader(config, coral_dir=coral_dir)
@@ -94,7 +104,9 @@ def _grader_worker(config_path: str, coral_dir: str, codebase_path: str, tasks: 
         result_queue.put(("error", e, traceback.format_exc()))
 
 
-def _run_grader_with_timeout(config_path: str, coral_dir: str, codebase_path: str, tasks: list, timeout: int):
+def _run_grader_with_timeout(
+    config_path: str, coral_dir: str, codebase_path: str, tasks: list, timeout: int
+):
     """Run grader in a separate process with a hard timeout.
 
     Uses multiprocessing so we can kill blocking synchronous code (numpy, etc.)
@@ -104,6 +116,7 @@ def _run_grader_with_timeout(config_path: str, coral_dir: str, codebase_path: st
     if timeout <= 0:
         # No timeout — run directly
         import asyncio
+
         config = CoralConfig.from_yaml(config_path)
         grader = load_grader(config, coral_dir=coral_dir)
         return asyncio.run(grader.grade(codebase_path, tasks))
@@ -187,7 +200,9 @@ def run_eval(message: str, agent_id: str, workdir: str = ".") -> Attempt:
     eval_timeout = config.grader.timeout  # 0 = no limit
 
     try:
-        result = _run_grader_with_timeout(str(config_path), str(coral_dir), str(workdir_path), [task], eval_timeout)
+        result = _run_grader_with_timeout(
+            str(config_path), str(coral_dir), str(workdir_path), [task], eval_timeout
+        )
         score = result.aggregated
         # Build feedback from bundle-level feedback + per-score explanations
         parts = []

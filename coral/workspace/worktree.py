@@ -37,7 +37,8 @@ def create_agent_worktree(repo_path: Path, agent_id: str, agents_dir: Path) -> P
     # Get current HEAD
     result = subprocess.run(
         ["git", "--git-dir", str(git_dir), "rev-parse", "HEAD"],
-        capture_output=True, text=True,
+        capture_output=True,
+        text=True,
     )
 
     if result.returncode == 0:
@@ -45,7 +46,8 @@ def create_agent_worktree(repo_path: Path, agent_id: str, agents_dir: Path) -> P
         logger.debug(f"HEAD={head[:12]}, creating branch {branch_name}")
         result = subprocess.run(
             ["git", "--git-dir", str(git_dir), "branch", branch_name, head],
-            capture_output=True, text=True,
+            capture_output=True,
+            text=True,
         )
         if result.returncode != 0 and "already exists" not in result.stderr:
             logger.warning(f"Branch creation: {result.stderr.strip()}")
@@ -53,20 +55,32 @@ def create_agent_worktree(repo_path: Path, agent_id: str, agents_dir: Path) -> P
         # No commits yet — create an initial commit
         logger.info("No commits found, creating initial empty commit")
         subprocess.run(
-            ["git", "--git-dir", str(git_dir), "--work-tree", str(repo_path),
-             "commit", "--allow-empty", "-m", "Initial commit"],
-            capture_output=True, text=True,
+            [
+                "git",
+                "--git-dir",
+                str(git_dir),
+                "--work-tree",
+                str(repo_path),
+                "commit",
+                "--allow-empty",
+                "-m",
+                "Initial commit",
+            ],
+            capture_output=True,
+            text=True,
         )
         subprocess.run(
             ["git", "--git-dir", str(git_dir), "branch", branch_name],
-            capture_output=True, text=True,
+            capture_output=True,
+            text=True,
         )
 
     # Create worktree
     logger.info(f"Creating worktree at {worktree_path} on branch {branch_name}")
     result = subprocess.run(
         ["git", "--git-dir", str(git_dir), "worktree", "add", str(worktree_path), branch_name],
-        capture_output=True, text=True,
+        capture_output=True,
+        text=True,
     )
     if result.returncode != 0:
         raise RuntimeError(
@@ -84,7 +98,16 @@ def create_agent_worktree(repo_path: Path, agent_id: str, agents_dir: Path) -> P
 def setup_gitignore(worktree_path: Path) -> None:
     """Write .gitignore to exclude CORAL-managed files from git."""
     gitignore_path = worktree_path / ".gitignore"
-    entries = {".coral_agent_id", ".coral_dir", "CLAUDE.md", "AGENTS.md", ".claude/", ".codex/", ".opencode/", ".venv/"}
+    entries = {
+        ".coral_agent_id",
+        ".coral_dir",
+        "CLAUDE.md",
+        "AGENTS.md",
+        ".claude/",
+        ".codex/",
+        ".opencode/",
+        ".venv/",
+    }
 
     # Preserve existing entries
     existing = set()
@@ -120,7 +143,9 @@ def get_coral_dir(worktree_path: Path) -> Path | None:
     return None
 
 
-def setup_shared_state(worktree_path: Path, coral_dir: Path, shared_dir_name: str = ".claude") -> None:
+def setup_shared_state(
+    worktree_path: Path, coral_dir: Path, shared_dir_name: str = ".claude"
+) -> None:
     """Create a shared state directory in the worktree with symlinks to .coral/public/.
 
     Symlinks notes, skills, attempts, and logs from .coral/public/ into
@@ -291,13 +316,9 @@ def setup_opencode_settings(
                 "name": "openai",
                 "options": provider_options,
                 "models": {
-                    "gpt-5.4": {
-                        "name": "gpt-5.4"
-                    },
-                    "claude-opus-4-6": {
-                        "name": "claude-opus-4-6"
-                    }
-                }
+                    "gpt-5.4": {"name": "gpt-5.4"},
+                    "claude-opus-4-6": {"name": "claude-opus-4-6"},
+                },
             },
         }
 
@@ -335,7 +356,7 @@ def setup_codex_settings(
     if gateway_url:
         lines += [
             'model_provider = "litellm"\n',
-            '[model_providers.litellm]',
+            "[model_providers.litellm]",
             'name = "LiteLLM Proxy"',
             f'base_url = "{gateway_url}/v1"',
             'wire_api = "responses"',
@@ -343,7 +364,7 @@ def setup_codex_settings(
         ]
 
     lines += [
-        '\n[tools]',
+        "\n[tools]",
         f'web_search = "{web_search}"',
     ]
 
@@ -391,7 +412,4 @@ def setup_worktree_env(worktree_path: Path, setup_commands: list[str]) -> None:
                 env=env,
             )
             if result.returncode != 0:
-                logger.warning(
-                    f"Failed to install coral in worktree: {result.stderr.strip()}"
-                )
-
+                logger.warning(f"Failed to install coral in worktree: {result.stderr.strip()}")

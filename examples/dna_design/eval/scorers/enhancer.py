@@ -23,9 +23,7 @@ from functools import lru_cache
 from typing import List, Optional, Tuple
 
 CURRENT_FILE_DIR = os.path.dirname(os.path.abspath(__file__))
-DEFAULT_CHECKPOINT = os.path.join(
-    CURRENT_FILE_DIR, "model_data", "epoch=13-step=34748.ckpt"
-)
+DEFAULT_CHECKPOINT = os.path.join(CURRENT_FILE_DIR, "model_data", "epoch=13-step=34748.ckpt")
 
 
 def is_available() -> bool:
@@ -69,9 +67,7 @@ class EnhancerScorer:
         self.model.eval()
 
     @lru_cache(maxsize=1000)
-    def _predict_expression(
-        self, sequences: Tuple[str, ...]
-    ) -> list[list[Optional[float]]]:
+    def _predict_expression(self, sequences: Tuple[str, ...]) -> list[list[Optional[float]]]:
         import grelu.data.dataset
         import pandas as pd
         import torch
@@ -106,9 +102,7 @@ class EnhancerScorer:
 
         return result
 
-    def score_expression(
-        self, sequences: list[str], cell_index: int
-    ) -> list[Optional[float]]:
+    def score_expression(self, sequences: list[str], cell_index: int) -> list[Optional[float]]:
         """Predict MPRA expression for a cell type (0=HepG2, 1=K562, 2=SKNSH)."""
         preds = self._predict_expression(tuple(sequences))
         return [p[cell_index] if isinstance(p, list) else None for p in preds]

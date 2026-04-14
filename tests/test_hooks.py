@@ -19,14 +19,20 @@ def _setup_repo_with_config(base_dir: Path) -> Path:
     repo = base_dir / "repo"
     repo.mkdir()
     subprocess.run(["git", "init", str(repo)], capture_output=True, check=True)
-    subprocess.run(["git", "-C", str(repo), "config", "user.email", "test@test.com"], capture_output=True)
+    subprocess.run(
+        ["git", "-C", str(repo), "config", "user.email", "test@test.com"], capture_output=True
+    )
     subprocess.run(["git", "-C", str(repo), "config", "user.name", "Test"], capture_output=True)
 
     # Create a file and .gitignore, then make an initial commit
     (repo / "hello.py").write_text("print('hello')\n")
-    (repo / ".gitignore").write_text(".coral/\n.coral_dir\n.claude/\n.coral_agent_id\nCLAUDE.md\ntest_grader_module.py\n")
+    (repo / ".gitignore").write_text(
+        ".coral/\n.coral_dir\n.claude/\n.coral_agent_id\nCLAUDE.md\ntest_grader_module.py\n"
+    )
     subprocess.run(["git", "-C", str(repo), "add", "hello.py", ".gitignore"], capture_output=True)
-    subprocess.run(["git", "-C", str(repo), "commit", "-m", "Initial"], capture_output=True, check=True)
+    subprocess.run(
+        ["git", "-C", str(repo), "commit", "-m", "Initial"], capture_output=True, check=True
+    )
 
     # Set up .coral directory with config
     coral_dir = repo / ".coral"
@@ -38,14 +44,15 @@ def _setup_repo_with_config(base_dir: Path) -> Path:
 
     # Write a config that uses a simple function grader
     grader_module = repo / "test_grader_module.py"
-    grader_module.write_text(
-        "def grade(codebase_path, tasks):\n"
-        "    return 0.75\n"
-    )
+    grader_module.write_text("def grade(codebase_path, tasks):\n    return 0.75\n")
 
     config = {
         "task": {"name": "test_task", "description": "A test"},
-        "grader": {"type": "function", "module": "test_grader_module", "args": {"func_name": "grade"}},
+        "grader": {
+            "type": "function",
+            "module": "test_grader_module",
+            "args": {"func_name": "grade"},
+        },
         "agents": {"count": 1},
         "sharing": {"attempts": True, "notes": True, "skills": True},
         "workspace": {"base_dir": str(repo), "repo_path": str(repo)},
@@ -69,7 +76,9 @@ def test_run_eval_with_function_grader():
         # Add the repo to sys.path so the grader module can be imported
         sys.path.insert(0, str(repo))
         try:
-            attempt = run_eval(message="Update hello message", agent_id="agent-test", workdir=str(repo))
+            attempt = run_eval(
+                message="Update hello message", agent_id="agent-test", workdir=str(repo)
+            )
         finally:
             sys.path.pop(0)
 
@@ -138,7 +147,6 @@ def test_run_eval_tracks_eval_count():
             assert getattr(a2, "_eval_count", None) == 2
         finally:
             sys.path.pop(0)
-
 
 
 def test_run_eval_sets_shared_state_hash():

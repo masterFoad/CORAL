@@ -72,26 +72,34 @@ class Grader(TaskGrader):
         # Run correctness tests first
         logger.info(f"Running correctness tests for {task_name}...")
         test_results = self._run_eval(
-            submission_path, mode="test", timeout=test_timeout, ranking_by=ranking_by,
+            submission_path,
+            mode="test",
+            timeout=test_timeout,
+            ranking_by=ranking_by,
         )
 
         if test_results.get("check") != "pass":
             error = self._extract_test_errors(test_results)
             return self._make_result(
-                correct=False, timing_us=None,
+                correct=False,
+                timing_us=None,
                 feedback=f"Correctness check failed: {error}",
             )
 
         # Run leaderboard benchmarks
         logger.info(f"Running benchmarks for {task_name}...")
         bench_results = self._run_eval(
-            submission_path, mode="leaderboard", timeout=ranked_timeout, ranking_by=ranking_by,
+            submission_path,
+            mode="leaderboard",
+            timeout=ranked_timeout,
+            ranking_by=ranking_by,
         )
 
         if bench_results.get("check") != "pass":
             error = self._extract_test_errors(bench_results)
             return self._make_result(
-                correct=True, timing_us=None,
+                correct=True,
+                timing_us=None,
                 feedback=f"Benchmark failed: {error}",
             )
 
@@ -99,7 +107,8 @@ class Grader(TaskGrader):
         timings = self._extract_timings(bench_results)
         if not timings:
             return self._make_result(
-                correct=True, timing_us=None,
+                correct=True,
+                timing_us=None,
                 feedback="Benchmarks passed but no timing data found",
             )
 
@@ -114,7 +123,8 @@ class Grader(TaskGrader):
         agg_us = agg_ns / 1000.0
 
         return self._make_result(
-            correct=True, timing_us=agg_us,
+            correct=True,
+            timing_us=agg_us,
             feedback=f"Runtime ({ranking_by}): {agg_us:.2f} us across {len(timings)} benchmark(s)",
         )
 

@@ -44,7 +44,14 @@ class Grader(TaskGrader):
                 return self.fail(f"{label} not found")
 
         try:
-            result = _run_evaluation(program_path, train_path, test_path, answers_path, timeout, self.get_python_command())
+            result = _run_evaluation(
+                program_path,
+                train_path,
+                test_path,
+                answers_path,
+                timeout,
+                self.get_python_command(),
+            )
         except TimeoutError:
             return self.fail(f"Evaluation timed out after {timeout}s")
         except Exception as e:
@@ -58,10 +65,7 @@ class Grader(TaskGrader):
         eval_time = result.get("eval_time", 0.0)
 
         col_details = ", ".join(f"{k}: {v:.5f}" for k, v in per_col.items())
-        explanation = (
-            f"MCRMSE: {mcrmse:.5f} ({col_details}) | "
-            f"Time: {eval_time:.1f}s"
-        )
+        explanation = f"MCRMSE: {mcrmse:.5f} ({col_details}) | Time: {eval_time:.1f}s"
 
         return self.score(mcrmse, explanation)
 
@@ -153,9 +157,7 @@ def _run_evaluation(
         raise RuntimeError(result.stderr.strip()[-2000:])
     stdout = result.stdout.strip()
     if not stdout:
-        raise RuntimeError(
-            f"Script produced no output.\nstderr: {result.stderr.strip()[-1000:]}"
-        )
+        raise RuntimeError(f"Script produced no output.\nstderr: {result.stderr.strip()[-1000:]}")
     try:
         return json.loads(stdout)
     except json.JSONDecodeError:

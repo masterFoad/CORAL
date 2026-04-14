@@ -37,7 +37,12 @@ class Grader(TaskGrader):
         timeout = self.timeout
 
         try:
-            result = _run_evaluation(program_path, self.read_eval_path("frozen_problem.py"), timeout, self.get_python_command())
+            result = _run_evaluation(
+                program_path,
+                self.read_eval_path("frozen_problem.py"),
+                timeout,
+                self.get_python_command(),
+            )
         except TimeoutError:
             return self.fail(f"Evaluation timed out after {timeout}s")
         except Exception as e:
@@ -67,7 +72,9 @@ class Grader(TaskGrader):
         return self.score(float(cycles), explanation)
 
 
-def _run_evaluation(program_path: str, utils_path: str, timeout: int, python_cmd: list[str]) -> dict:
+def _run_evaluation(
+    program_path: str, utils_path: str, timeout: int, python_cmd: list[str]
+) -> dict:
     """Run the kernel in a subprocess with the frozen simulator.
 
     Matches the original submission_tests.py methodology:
@@ -136,6 +143,7 @@ def _run_evaluation(program_path: str, utils_path: str, timeout: int, python_cmd
         }}))
     """)
     import subprocess
+
     result = subprocess.run(
         [*python_cmd, "-c", script],
         capture_output=True,
@@ -146,9 +154,7 @@ def _run_evaluation(program_path: str, utils_path: str, timeout: int, python_cmd
         raise RuntimeError(result.stderr.strip()[-2000:])
     stdout = result.stdout.strip()
     if not stdout:
-        raise RuntimeError(
-            f"Script produced no output.\nstderr: {result.stderr.strip()[-1000:]}"
-        )
+        raise RuntimeError(f"Script produced no output.\nstderr: {result.stderr.strip()[-1000:]}")
     try:
         return json.loads(stdout)
     except json.JSONDecodeError:

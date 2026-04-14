@@ -1,0 +1,43 @@
+task:
+  name: vllm_optimization
+  description: |
+    Your objective is to explore the `vllm` repository (which is cloned in the `vllm/` directory) and identify code or algorithms that can be optimized, made better, or improved (e.g., memory usage, latency, throughput, algorithmic complexity, kernel efficiency).
+    
+    You must create a markdown document named `optimizations.md` in the root of your workspace.
+    For each potential optimization, include:
+    - The file path and line number(s)
+    - A detailed explanation of why it can be improved and the proposed solution
+    - A ranking (e.g., 1 to 10) based on expected impact vs effort.
+    
+    You are one of 4 agents working on this. Please share your findings, tools, or search scripts with other agents using the shared CORAL volume. You can write your findings to `.coral/notes/` so other agents can see what you have found and avoid duplicate work.
+
+grader:
+  type: agent
+  args:
+    agent_command: ["npx", "opencode", "-p", "{prompt}"]
+    rubric: |
+      Read the optimizations.md file. Use your tools to explore the vllm codebase to verify the agent's claims.
+      Score from 0.0 to 1.0 based on:
+      1. Depth, accuracy, and insightfulness of the optimizations found in the vLLM codebase.
+      2. Feasibility and technical soundness of the proposed solutions (e.g., CUDA optimizations, batching improvements, algorithm replacements). Verify if the code paths they mention actually exist and if their suggestions make sense.
+      3. Clarity and structure of the document (clear paths, explanations, rankings).
+      Return a higher score for highly impactful, non-trivial, and well-explained optimizations. Give a low score if the file is missing or lacks substance.
+
+agents:
+  count: 4
+  runtime: opencode
+  model: gemini/gemini-3.1-pro-preview
+  max_turns: 50
+  gateway:
+    enabled: false
+  
+workspace:
+  results_dir: "./results"
+  repo_path: "./examples/vllm_optimization/seed"
+  setup:
+    - "git clone --depth 1 https://github.com/vllm-project/vllm.git"
+
+run:
+  verbose: false
+  ui: true
+  session: docker

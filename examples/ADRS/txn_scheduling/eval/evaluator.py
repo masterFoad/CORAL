@@ -205,6 +205,7 @@ def evaluate(program_path, python_cmd=None):
             "combined_score": 0.0,
         }
 
+
 # Stage-based evaluation for cascade evaluation
 def evaluate_stage1(program_path, python_cmd=None):
     """
@@ -213,7 +214,9 @@ def evaluate_stage1(program_path, python_cmd=None):
     try:
         # Use the simplified subprocess approach
         try:
-            makespan, schedule = run_with_timeout(program_path, timeout_seconds=600, python_cmd=python_cmd)
+            makespan, schedule = run_with_timeout(
+                program_path, timeout_seconds=600, python_cmd=python_cmd
+            )
 
             valid = True
             for s in schedule:

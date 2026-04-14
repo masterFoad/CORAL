@@ -104,13 +104,15 @@ def run(train_path: str, test_path: str) -> pd.DataFrame:
     for i, row in test.iterrows():
         sample_id = row["id"]
         for j in range(seq_length):
-            rows.append({
-                "id_seqpos": f"{sample_id}_{j}",
-                "reactivity": predictions["reactivity"][i, j],
-                "deg_Mg_pH10": predictions["deg_Mg_pH10"][i, j],
-                "deg_pH10": predictions["deg_pH10"][i, j],
-                "deg_Mg_50C": predictions["deg_Mg_50C"][i, j],
-                "deg_50C": predictions["deg_50C"][i, j],
-            })
+            rows.append(
+                {
+                    "id_seqpos": f"{sample_id}_{j}",
+                    "reactivity": predictions["reactivity"][i, j],
+                    "deg_Mg_pH10": predictions["deg_Mg_pH10"][i, j],
+                    "deg_pH10": predictions["deg_pH10"][i, j],
+                    "deg_Mg_50C": predictions["deg_Mg_50C"][i, j],
+                    "deg_50C": predictions["deg_50C"][i, j],
+                }
+            )
 
     return pd.DataFrame(rows)

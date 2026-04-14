@@ -85,7 +85,7 @@ class UncertaintyOptimizer:
         if r_max is None:
             r_max = float(r_candidates[-1])
 
-        c4 = (r_max ** 2) / (2 * np.pi)
+        c4 = (r_max**2) / (2 * np.pi)
         return hermite_coeffs, c4, r_max
 
 

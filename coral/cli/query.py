@@ -339,9 +339,7 @@ def _collect_runs(results_dir: Path) -> list[dict]:
                     except (json.JSONDecodeError, OSError):
                         attempt_count += 1
 
-            is_latest = latest_resolved is not None and (
-                latest_resolved == run_dir.resolve()
-            )
+            is_latest = latest_resolved is not None and (latest_resolved == run_dir.resolve())
 
             runs.append(
                 {

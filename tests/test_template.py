@@ -117,4 +117,6 @@ def test_generate_coral_md_score_directions():
             grader=GraderConfig(type=grader_type),
         )
         md = generate_coral_md(config, "agent-1")
-        assert expected_fragment in md, f"Missing '{expected_fragment}' for grader type '{grader_type}'"
+        assert expected_fragment in md, (
+            f"Missing '{expected_fragment}' for grader type '{grader_type}'"
+        )

@@ -52,6 +52,7 @@ def validate_task(task_dir: Path) -> list[str]:
                     errors.append("eval/grader.py must export a class named 'Grader'")
                 else:
                     from coral.grader.task_grader import TaskGrader
+
                     if not issubclass(grader_cls, TaskGrader):
                         errors.append(
                             f"Grader class must inherit from TaskGrader, "
@@ -63,8 +64,7 @@ def validate_task(task_dir: Path) -> list[str]:
     # 4. direction is valid
     if config.grader.direction not in ("maximize", "minimize"):
         errors.append(
-            f"grader.direction must be 'maximize' or 'minimize', "
-            f"got '{config.grader.direction}'"
+            f"grader.direction must be 'maximize' or 'minimize', got '{config.grader.direction}'"
         )
 
     # 5. Extra private files exist if specified

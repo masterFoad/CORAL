@@ -156,6 +156,7 @@ def _run_evaluation(program_path: str, timeout: int, python_cmd: list[str]) -> d
             sys.exit(0)
     """)
     import subprocess
+
     result = subprocess.run(
         [*python_cmd, "-c", script],
         capture_output=True,
@@ -166,9 +167,7 @@ def _run_evaluation(program_path: str, timeout: int, python_cmd: list[str]) -> d
         raise RuntimeError(result.stderr.strip()[-2000:])
     stdout = result.stdout.strip()
     if not stdout:
-        raise RuntimeError(
-            f"Script produced no output.\nstderr: {result.stderr.strip()[-1000:]}"
-        )
+        raise RuntimeError(f"Script produced no output.\nstderr: {result.stderr.strip()[-1000:]}")
     try:
         return json.loads(stdout)
     except json.JSONDecodeError:

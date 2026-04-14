@@ -41,7 +41,14 @@ class Grader(TaskGrader):
                 return self.fail(f"{label} not found")
 
         try:
-            result = _run_evaluation(program_path, train_path, test_path, answers_path, timeout, self.get_python_command())
+            result = _run_evaluation(
+                program_path,
+                train_path,
+                test_path,
+                answers_path,
+                timeout,
+                self.get_python_command(),
+            )
         except TimeoutError:
             return self.fail(f"Evaluation timed out after {timeout}s")
         except Exception as e:
@@ -57,13 +64,14 @@ class Grader(TaskGrader):
         per_digit = result.get("per_digit", {})
 
         explanation = (
-            f"Accuracy: {accuracy:.5f} ({n_correct}/{n_total} correct) | "
-            f"Time: {eval_time:.1f}s"
+            f"Accuracy: {accuracy:.5f} ({n_correct}/{n_total} correct) | Time: {eval_time:.1f}s"
         )
         if per_digit:
             worst = min(per_digit.items(), key=lambda x: x[1])
             best = max(per_digit.items(), key=lambda x: x[1])
-            explanation += f" | Best digit: {best[0]} ({best[1]:.3f}), Worst: {worst[0]} ({worst[1]:.3f})"
+            explanation += (
+                f" | Best digit: {best[0]} ({best[1]:.3f}), Worst: {worst[0]} ({worst[1]:.3f})"
+            )
 
         return self.score(accuracy, explanation)
 
@@ -133,9 +141,7 @@ def _run_evaluation(
         raise RuntimeError(result.stderr.strip()[-2000:])
     stdout = result.stdout.strip()
     if not stdout:
-        raise RuntimeError(
-            f"Script produced no output.\nstderr: {result.stderr.strip()[-1000:]}"
-        )
+        raise RuntimeError(f"Script produced no output.\nstderr: {result.stderr.strip()[-1000:]}")
     try:
         return json.loads(stdout)
     except json.JSONDecodeError:

@@ -82,6 +82,7 @@ class FunctionGrader(BaseGrader):
                 is_public=is_public,
                 **kwargs,
             )
+
         return decorator
 
 

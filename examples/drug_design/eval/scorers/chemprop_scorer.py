@@ -24,9 +24,7 @@ from pathlib import Path
 from typing import List, Optional, Tuple
 
 CURRENT_FILE_DIR = os.path.dirname(os.path.abspath(__file__))
-DEFAULT_MODELS_DIR = os.path.join(
-    CURRENT_FILE_DIR, "model_data", "antibiotics", "models"
-)
+DEFAULT_MODELS_DIR = os.path.join(CURRENT_FILE_DIR, "model_data", "antibiotics", "models")
 
 
 def is_available() -> bool:
@@ -68,15 +66,16 @@ class ChempropScorer:
             if ckpt.exists():
                 paths.append(str(ckpt))
         if not paths:
-            raise FileNotFoundError(
-                f"No toxicity model checkpoints found under {tox_root}"
-            )
+            raise FileNotFoundError(f"No toxicity model checkpoints found under {tox_root}")
 
         # Build ensemble predict args
         args_list = [
-            "--test_path", "/dev/null",
-            "--preds_path", "/dev/null",
-            "--checkpoint_path", paths[0],
+            "--test_path",
+            "/dev/null",
+            "--preds_path",
+            "/dev/null",
+            "--checkpoint_path",
+            paths[0],
         ]
         predict_args = chemprop.args.PredictArgs().parse_args(args_list)
 
@@ -87,9 +86,13 @@ class ChempropScorer:
             train_args = chemprop.utils.load_args(paths[0])
 
         for attr in [
-            "features_scaling", "atom_descriptors", "bond_descriptors",
-            "features_generator", "features_path",
-            "atom_features_path", "bond_features_path",
+            "features_scaling",
+            "atom_descriptors",
+            "bond_descriptors",
+            "features_generator",
+            "features_path",
+            "atom_features_path",
+            "bond_features_path",
         ]:
             if hasattr(train_args, attr):
                 setattr(predict_args, attr, getattr(train_args, attr))
@@ -107,9 +110,7 @@ class ChempropScorer:
 
         self._model_set = (predict_args, model_objects)
 
-    def score_toxicity_safety(
-        self, smiles_list: list[str]
-    ) -> list[Optional[float]]:
+    def score_toxicity_safety(self, smiles_list: list[str]) -> list[Optional[float]]:
         """Return safety score = 1 - toxicity_probability for each molecule."""
         import torch
         import chemprop

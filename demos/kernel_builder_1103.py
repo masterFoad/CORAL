@@ -101,9 +101,12 @@ def _rw_for_slot(engine, slot):
     return r, w
 
 
-def _do_schedule(slots, engines, rw, pred_sets, succs, priority, in_degree_orig, limits, n, seed=0, mode=0):
+def _do_schedule(
+    slots, engines, rw, pred_sets, succs, priority, in_degree_orig, limits, n, seed=0, mode=0
+):
     """Run one scheduling pass with optional perturbation for tie-breaking."""
     import random
+
     rng = random.Random(seed)
 
     in_degree = in_degree_orig[:]
@@ -226,9 +229,12 @@ def _do_schedule(slots, engines, rw, pred_sets, succs, priority, in_degree_orig,
     return instrs
 
 
-def _do_backward_schedule(slots, engines, rw, pred_sets, succs, priority, limits, n, seed=0, mode=0):
+def _do_backward_schedule(
+    slots, engines, rw, pred_sets, succs, priority, limits, n, seed=0, mode=0
+):
     """Backward list scheduler: schedule from sinks to sources, then reverse."""
     import random
+
     rng = random.Random(seed)
 
     out_degree = [len(succs[i]) for i in range(n)]
@@ -388,7 +394,7 @@ def list_schedule(slots, search_time=30):
     ]
 
     best = None
-    best_len = float('inf')
+    best_len = float("inf")
 
     for engine_cost in cost_configs:
         # Standard critical-path priority
@@ -402,7 +408,19 @@ def list_schedule(slots, search_time=30):
 
         for mode in range(8):
             for seed in range(5):
-                candidate = _do_schedule(slots, engines, rw, pred_sets, succs, priority, in_degree, limits, n, seed=seed, mode=mode)
+                candidate = _do_schedule(
+                    slots,
+                    engines,
+                    rw,
+                    pred_sets,
+                    succs,
+                    priority,
+                    in_degree,
+                    limits,
+                    n,
+                    seed=seed,
+                    mode=mode,
+                )
                 if len(candidate) < best_len:
                     best = candidate
                     best_len = len(candidate)
@@ -430,7 +448,18 @@ def list_schedule(slots, search_time=30):
 
         for mode in range(8):
             for seed in range(4):
-                candidate = _do_backward_schedule(slots, engines, rw, pred_sets, succs, fwd_priority, limits, n, seed=seed, mode=mode)
+                candidate = _do_backward_schedule(
+                    slots,
+                    engines,
+                    rw,
+                    pred_sets,
+                    succs,
+                    fwd_priority,
+                    limits,
+                    n,
+                    seed=seed,
+                    mode=mode,
+                )
                 if len(candidate) < best_len:
                     best = candidate
                     best_len = len(candidate)
@@ -449,15 +478,29 @@ def list_schedule(slots, search_time=30):
     mobility_priority = [best_len - (alap[i] - asap[i]) for i in range(n)]
     for mode in range(8):
         for seed in range(3):
-            candidate = _do_schedule(slots, engines, rw, pred_sets, succs, mobility_priority, in_degree, limits, n, seed=seed, mode=mode)
+            candidate = _do_schedule(
+                slots,
+                engines,
+                rw,
+                pred_sets,
+                succs,
+                mobility_priority,
+                in_degree,
+                limits,
+                n,
+                seed=seed,
+                mode=mode,
+            )
             if len(candidate) < best_len:
                 best = candidate
                 best_len = len(candidate)
 
     # Time-budgeted random search: try random priority perturbations
     import time
+
     deadline = time.time() + search_time
     import random
+
     rng = random.Random(best_len * 7 + 13)  # seed based on current best
     base_priority = priority  # use last config's priority as base
     trial = 0
@@ -466,13 +509,27 @@ def list_schedule(slots, search_time=30):
         perturbed = [base_priority[i] + rng.randint(0, best_len // 4) for i in range(n)]
         mode = rng.randint(0, 7)
         seed = rng.randint(0, 99)
-        candidate = _do_schedule(slots, engines, rw, pred_sets, succs, perturbed, in_degree, limits, n, seed=seed, mode=mode)
+        candidate = _do_schedule(
+            slots,
+            engines,
+            rw,
+            pred_sets,
+            succs,
+            perturbed,
+            in_degree,
+            limits,
+            n,
+            seed=seed,
+            mode=mode,
+        )
         if len(candidate) < best_len:
             best = candidate
             best_len = len(candidate)
         # Also try backward with same perturbation
         bwd_perturbed = [fwd_priority[i] + rng.randint(0, best_len // 4) for i in range(n)]
-        candidate = _do_backward_schedule(slots, engines, rw, pred_sets, succs, bwd_perturbed, limits, n, seed=seed, mode=mode)
+        candidate = _do_backward_schedule(
+            slots, engines, rw, pred_sets, succs, bwd_perturbed, limits, n, seed=seed, mode=mode
+        )
         if len(candidate) < best_len:
             best = candidate
             best_len = len(candidate)
@@ -639,7 +696,9 @@ class KernelBuilder:
         self.pending_slots.append(("valu", ("+", two_vec, one_vec, one_vec)))
 
         forest_base_vec = self.alloc_scratch("forest_base_vec", 8)
-        self.pending_slots.append(("valu", ("vbroadcast", forest_base_vec, self.scratch["forest_values_p"])))
+        self.pending_slots.append(
+            ("valu", ("vbroadcast", forest_base_vec, self.scratch["forest_values_p"]))
+        )
         # Shifted-idx constant: idx_precompute uses multiply_add with (1-fb) instead of 1
         one_minus_fb_vec = self.alloc_scratch("one_minus_fb_vec", 8)
         self.pending_slots.append(("valu", ("-", one_minus_fb_vec, one_vec, forest_base_vec)))
@@ -671,16 +730,24 @@ class KernelBuilder:
         # Chain remaining addresses from nearest seed via ALU
         # From seed 1: nodes 2,3
         for ni in [2, 3]:
-            self.pending_slots.append(("alu", ("+", node_addrs[ni-1], node_addrs[ni-2], one_scalar)))
+            self.pending_slots.append(
+                ("alu", ("+", node_addrs[ni - 1], node_addrs[ni - 2], one_scalar))
+            )
         # From seed 4: nodes 5,6,7
         for ni in [5, 6, 7]:
-            self.pending_slots.append(("alu", ("+", node_addrs[ni-1], node_addrs[ni-2], one_scalar)))
+            self.pending_slots.append(
+                ("alu", ("+", node_addrs[ni - 1], node_addrs[ni - 2], one_scalar))
+            )
         # From seed 8: nodes 9,10,11
         for ni in [9, 10, 11]:
-            self.pending_slots.append(("alu", ("+", node_addrs[ni-1], node_addrs[ni-2], one_scalar)))
+            self.pending_slots.append(
+                ("alu", ("+", node_addrs[ni - 1], node_addrs[ni - 2], one_scalar))
+            )
         # From seed 12: nodes 13,14
         for ni in [13, 14]:
-            self.pending_slots.append(("alu", ("+", node_addrs[ni-1], node_addrs[ni-2], one_scalar)))
+            self.pending_slots.append(
+                ("alu", ("+", node_addrs[ni - 1], node_addrs[ni - 2], one_scalar))
+            )
         # Load all node values
         for ni in range(14):
             self.pending_slots.append(("load", ("load", node_scalars[ni], node_addrs[ni])))
@@ -701,7 +768,9 @@ class KernelBuilder:
         # Depth-3 nodes (7-14)
         # Derive threshold vectors: nine_vec first, then derive five, eleven, thirteen
         nine_vec = self.alloc_scratch("nine_plus_fb_vec", 8)
-        self.pending_slots.append(("valu", ("+", nine_vec, self.scratch_const_vector(9), forest_base_vec)))
+        self.pending_slots.append(
+            ("valu", ("+", nine_vec, self.scratch_const_vector(9), forest_base_vec))
+        )
         # five = nine - 2 - 2 (saves 9 scratch slots vs scratch_const_vector(5))
         five_vec = self.alloc_scratch("five_plus_fb_vec", 8)
         self.pending_slots.append(("valu", ("-", five_vec, nine_vec, two_vec)))
@@ -734,12 +803,14 @@ class KernelBuilder:
         # Chunks 0,1: use FLOW add_imm to establish base + stride
         for ci in range(2):
             addr_v = self.alloc_scratch(f"store_val_addr_{ci}")
-            self.pending_slots.append(("flow", ("add_imm", addr_v, self.scratch["inp_values_p"], ci * VLEN)))
+            self.pending_slots.append(
+                ("flow", ("add_imm", addr_v, self.scratch["inp_values_p"], ci * VLEN))
+            )
             store_val_addrs.append(addr_v)
         # Chunks 2-31: chain via ALU add with stride=VLEN
         for ci in range(2, N_CHUNKS):
             addr_v = self.alloc_scratch(f"store_val_addr_{ci}")
-            self.pending_slots.append(("alu", ("+", addr_v, store_val_addrs[ci-1], vlen_scalar)))
+            self.pending_slots.append(("alu", ("+", addr_v, store_val_addrs[ci - 1], vlen_scalar)))
             store_val_addrs.append(addr_v)
 
         # Shared temp pools for depth-3 cascade (process BATCH_SIZE chunks at a time)
@@ -780,7 +851,9 @@ class KernelBuilder:
                 for ci in active:
                     ch = chunks[ci]
                     for lane in range(8):
-                        body.append(("alu", ("^", ch["val"] + lane, ch["val"] + lane, node0_vec + lane)))
+                        body.append(
+                            ("alu", ("^", ch["val"] + lane, ch["val"] + lane, node0_vec + lane))
+                        )
             elif r in depth1_rounds:
                 # Reuse bit0_hash from previous round's idx update (t1 still holds val&1)
                 # idx&1 = (1 + bit0_hash)&1 = NOT bit0_hash, so swap node args in vselect
@@ -796,11 +869,15 @@ class KernelBuilder:
                 # 2. t2 = vselect(t1, node4, node3)
                 for ci in active:
                     ch = chunks[ci]
-                    body.append(("flow", ("vselect", ch["t2"], ch["t1"], node_d2_vecs[1], node_d2_vecs[0])))
+                    body.append(
+                        ("flow", ("vselect", ch["t2"], ch["t1"], node_d2_vecs[1], node_d2_vecs[0]))
+                    )
                 # 4. t1 = vselect(t1, node6, node5) — emitted early, before t2 XOR
                 for ci in active:
                     ch = chunks[ci]
-                    body.append(("flow", ("vselect", ch["t1"], ch["t1"], node_d2_vecs[3], node_d2_vecs[2])))
+                    body.append(
+                        ("flow", ("vselect", ch["t1"], ch["t1"], node_d2_vecs[3], node_d2_vecs[2]))
+                    )
                 # 3. t2 = val ^ t2
                 for ci in active:
                     ch = chunks[ci]
@@ -832,12 +909,28 @@ class KernelBuilder:
                     # Step 2: pair_78 = vselect(t1, node8, node7) → t2 (swapped for bit0_hash)
                     for bi, ci in enumerate(batch_chunks):
                         ch = chunks[ci]
-                        body.append(("flow", ("vselect", ch["t2"], ch["t1"], node_d3_vecs[1], node_d3_vecs[0])))
+                        body.append(
+                            (
+                                "flow",
+                                ("vselect", ch["t2"], ch["t1"], node_d3_vecs[1], node_d3_vecs[0]),
+                            )
+                        )
 
                     # Step 3: pair_910 = vselect(t1, node10, node9) → shared_t3 (swapped)
                     for bi, ci in enumerate(batch_chunks):
                         ch = chunks[ci]
-                        body.append(("flow", ("vselect", shared_t3_pool[bi], ch["t1"], node_d3_vecs[3], node_d3_vecs[2])))
+                        body.append(
+                            (
+                                "flow",
+                                (
+                                    "vselect",
+                                    shared_t3_pool[bi],
+                                    ch["t1"],
+                                    node_d3_vecs[3],
+                                    node_d3_vecs[2],
+                                ),
+                            )
+                        )
 
                     # Step 4: cond9 = idx < 9 → shared_t4 (preserve bit0 in t1!)
                     for bi, ci in enumerate(batch_chunks):
@@ -847,18 +940,51 @@ class KernelBuilder:
                     # Step 5: left_node = vselect(cond9, t2, shared_t3) → t2
                     for bi, ci in enumerate(batch_chunks):
                         ch = chunks[ci]
-                        body.append(("flow", ("vselect", ch["t2"], shared_t4_pool[bi], ch["t2"], shared_t3_pool[bi])))
+                        body.append(
+                            (
+                                "flow",
+                                (
+                                    "vselect",
+                                    ch["t2"],
+                                    shared_t4_pool[bi],
+                                    ch["t2"],
+                                    shared_t3_pool[bi],
+                                ),
+                            )
+                        )
 
                     # Step 6: pair_1112 = vselect(bit0_hash, node12, node11) → shared_t3 (swapped)
                     # (bit0_hash still in t1 — no recomputation needed!)
                     for bi, ci in enumerate(batch_chunks):
                         ch = chunks[ci]
-                        body.append(("flow", ("vselect", shared_t3_pool[bi], ch["t1"], node_d3_vecs[5], node_d3_vecs[4])))
+                        body.append(
+                            (
+                                "flow",
+                                (
+                                    "vselect",
+                                    shared_t3_pool[bi],
+                                    ch["t1"],
+                                    node_d3_vecs[5],
+                                    node_d3_vecs[4],
+                                ),
+                            )
+                        )
 
                     # Step 8: pair_1314 = vselect(t1, node14, node13) → shared_t4 (swapped)
                     for bi, ci in enumerate(batch_chunks):
                         ch = chunks[ci]
-                        body.append(("flow", ("vselect", shared_t4_pool[bi], ch["t1"], node_d3_vecs[7], node_d3_vecs[6])))
+                        body.append(
+                            (
+                                "flow",
+                                (
+                                    "vselect",
+                                    shared_t4_pool[bi],
+                                    ch["t1"],
+                                    node_d3_vecs[7],
+                                    node_d3_vecs[6],
+                                ),
+                            )
+                        )
 
                     # Step 9: cond13 = idx < 13 → t1
                     for bi, ci in enumerate(batch_chunks):
@@ -868,7 +994,18 @@ class KernelBuilder:
                     # Step 10: right_node = vselect(cond13, shared_t3, shared_t4) → shared_t3
                     for bi, ci in enumerate(batch_chunks):
                         ch = chunks[ci]
-                        body.append(("flow", ("vselect", shared_t3_pool[bi], ch["t1"], shared_t3_pool[bi], shared_t4_pool[bi])))
+                        body.append(
+                            (
+                                "flow",
+                                (
+                                    "vselect",
+                                    shared_t3_pool[bi],
+                                    ch["t1"],
+                                    shared_t3_pool[bi],
+                                    shared_t4_pool[bi],
+                                ),
+                            )
+                        )
 
                     # Step 11: cond_top = idx < 11 → t1
                     for bi, ci in enumerate(batch_chunks):
@@ -878,7 +1015,9 @@ class KernelBuilder:
                     # Step 12: selected = vselect(cond_top, t2, shared_t3) → t1
                     for bi, ci in enumerate(batch_chunks):
                         ch = chunks[ci]
-                        body.append(("flow", ("vselect", ch["t1"], ch["t1"], ch["t2"], shared_t3_pool[bi])))
+                        body.append(
+                            ("flow", ("vselect", ch["t1"], ch["t1"], ch["t2"], shared_t3_pool[bi]))
+                        )
 
                     # Step 13: val = val ^ selected_node
                     for bi, ci in enumerate(batch_chunks):
@@ -895,7 +1034,13 @@ class KernelBuilder:
             # Gather XOR (generic rounds only)
             for ci in active:
                 ch = chunks[ci]
-                if not (r == 0 or r == reset_round or r in depth1_rounds or r in depth2_rounds or r in depth3_rounds):
+                if not (
+                    r == 0
+                    or r == reset_round
+                    or r in depth1_rounds
+                    or r in depth2_rounds
+                    or r in depth3_rounds
+                ):
                     body.append(("valu", ("^", ch["val"], ch["val"], ch["t2"])))
             # Idx precompute — moved early: only depends on idx, runs parallel with hash
             for ci in active:
@@ -909,7 +1054,9 @@ class KernelBuilder:
                 elif r == rounds - 1:
                     pass  # Skip: idx not stored, no next round
                 else:
-                    body.append(("valu", ("multiply_add", ch["idx"], ch["idx"], two_vec, one_minus_fb_vec)))
+                    body.append(
+                        ("valu", ("multiply_add", ch["idx"], ch["idx"], two_vec, one_minus_fb_vec))
+                    )
             # Stage 1
             for ci in active:
                 ch = chunks[ci]
@@ -943,7 +1090,9 @@ class KernelBuilder:
                 ch = chunks[ci]
                 if r != forest_height and r != rounds - 1:
                     for lane in range(8):
-                        body.append(("alu", ("&", ch["t1"] + lane, ch["val"] + lane, one_vec + lane)))
+                        body.append(
+                            ("alu", ("&", ch["t1"] + lane, ch["val"] + lane, one_vec + lane))
+                        )
                     if r == 0 or r == reset_round:
                         # Fused: idx starts at 0/reset, directly idx = one_plus_fb_vec + t1
                         body.append(("valu", ("+", ch["idx"], one_plus_fb_vec, ch["t1"])))

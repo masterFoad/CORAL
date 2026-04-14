@@ -37,7 +37,10 @@ class Grader(TaskGrader):
 
         try:
             result = _run_evaluation(
-                program_path, scorer_dir, top_k, timeout,
+                program_path,
+                scorer_dir,
+                top_k,
+                timeout,
                 self.get_python_command(),
             )
         except TimeoutError:
@@ -67,12 +70,22 @@ class Grader(TaskGrader):
 
         feedback_lines = []
         if has_enhancer:
-            feedback_lines.append(f"Top-{top_k} HepG2 expression: {result.get('hepg2_mean', 0):.4f}")
-            feedback_lines.append(f"Top-{top_k} K562 expression (off-target): {result.get('k562_mean', 0):.4f}")
-            feedback_lines.append(f"Top-{top_k} SKNSH expression (off-target): {result.get('sknsh_mean', 0):.4f}")
-            feedback_lines.append("Composite = HepG2 - 0.3*(K562+SKNSH) + 0.1*diversity + 0.1*gc_bonus")
+            feedback_lines.append(
+                f"Top-{top_k} HepG2 expression: {result.get('hepg2_mean', 0):.4f}"
+            )
+            feedback_lines.append(
+                f"Top-{top_k} K562 expression (off-target): {result.get('k562_mean', 0):.4f}"
+            )
+            feedback_lines.append(
+                f"Top-{top_k} SKNSH expression (off-target): {result.get('sknsh_mean', 0):.4f}"
+            )
+            feedback_lines.append(
+                "Composite = HepG2 - 0.3*(K562+SKNSH) + 0.1*diversity + 0.1*gc_bonus"
+            )
         else:
-            feedback_lines.append("[Enhancer model not available — using GC/diversity proxy scoring]")
+            feedback_lines.append(
+                "[Enhancer model not available — using GC/diversity proxy scoring]"
+            )
             feedback_lines.append("Composite = gc_bonus + diversity_bonus")
             feedback_lines.append("Install grelu + model checkpoint for full expression scoring.")
         feedback_lines.append(f"Population diversity (Hamming): {diversity:.4f}")
@@ -83,7 +96,10 @@ class Grader(TaskGrader):
 
 
 def _run_evaluation(
-    program_path: str, scorer_dir: str, top_k: int, timeout: int,
+    program_path: str,
+    scorer_dir: str,
+    top_k: int,
+    timeout: int,
     python_cmd: list[str],
 ) -> dict:
     import subprocess
@@ -202,7 +218,9 @@ def _run_evaluation(
     """)
     result = subprocess.run(
         [*python_cmd, "-c", script],
-        capture_output=True, text=True, timeout=timeout,
+        capture_output=True,
+        text=True,
+        timeout=timeout,
     )
     if result.returncode != 0:
         raise RuntimeError(result.stderr.strip()[-2000:])
@@ -219,4 +237,6 @@ def _run_evaluation(
                     return json.loads(line)
                 except json.JSONDecodeError:
                     continue
-        raise RuntimeError(f"No valid JSON.\nstdout: {stdout[-500:]}\nstderr: {result.stderr.strip()[-500:]}")
+        raise RuntimeError(
+            f"No valid JSON.\nstdout: {stdout[-500:]}\nstderr: {result.stderr.strip()[-500:]}"
+        )

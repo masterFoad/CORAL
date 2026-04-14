@@ -26,9 +26,7 @@ from pathlib import Path
 from typing import List, Optional, Tuple
 
 CURRENT_FILE_DIR = os.path.dirname(os.path.abspath(__file__))
-DEFAULT_MODELS_DIR = os.path.join(
-    CURRENT_FILE_DIR, "model_data", "minimol_antibiotics"
-)
+DEFAULT_MODELS_DIR = os.path.join(CURRENT_FILE_DIR, "model_data", "minimol_antibiotics")
 
 
 def is_available() -> bool:
@@ -120,9 +118,7 @@ class MLPClassifier(pl.LightningModule):
         return self.head(x)
 
     def configure_optimizers(self):
-        return torch.optim.AdamW(
-            self.parameters(), lr=self.hparams.learning_rate
-        )
+        return torch.optim.AdamW(self.parameters(), lr=self.hparams.learning_rate)
 
 
 # ---------------------------------------------------------------------------
@@ -169,18 +165,18 @@ class MinimolScorer:
             if not gono_paths:
                 raise FileNotFoundError("No gonorrhea model checkpoints found.")
             cls._gram_neg_models = [
-                MLPClassifier.load_from_checkpoint(p, map_location="cpu").eval()
-                for p in gram_paths
+                MLPClassifier.load_from_checkpoint(p, map_location="cpu").eval() for p in gram_paths
             ]
             cls._gonorrhea_models = [
-                MLPClassifier.load_from_checkpoint(p, map_location="cpu").eval()
-                for p in gono_paths
+                MLPClassifier.load_from_checkpoint(p, map_location="cpu").eval() for p in gono_paths
             ]
             from minimol import Minimol
+
             cls._featurizer = Minimol(batch_size=64)
 
     def _featurize(self, smiles_list: list[str]) -> Tuple[torch.Tensor, list[int]]:
         """Featurize SMILES with error handling, returns (features, kept_positions)."""
+
         def _recurse(slist, positions):
             try:
                 feats = self.__class__._featurizer(slist)
@@ -198,9 +194,7 @@ class MinimolScorer:
             return torch.stack(feats), kept
         return torch.empty(0), []
 
-    def _predict_ensemble(
-        self, features: torch.Tensor, models: list
-    ) -> torch.Tensor:
+    def _predict_ensemble(self, features: torch.Tensor, models: list) -> torch.Tensor:
         preds = []
         with torch.inference_mode():
             for model in models:
@@ -208,9 +202,7 @@ class MinimolScorer:
                 preds.append(torch.sigmoid(logits).cpu())
         return torch.stack(preds).mean(dim=0)
 
-    def _score(
-        self, smiles_list: list[str], models: list, task_idx: int
-    ) -> list[Optional[float]]:
+    def _score(self, smiles_list: list[str], models: list, task_idx: int) -> list[Optional[float]]:
         from rdkit import Chem
 
         valid_smiles, valid_idx = [], []

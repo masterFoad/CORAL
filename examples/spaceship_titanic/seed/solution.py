@@ -92,9 +92,11 @@ def run(train_path: str, test_path: str) -> pd.DataFrame:
     # Predict
     preds = model.predict(X_test)
 
-    result = pd.DataFrame({
-        "PassengerId": test_ids,
-        "Transported": preds.astype(bool),
-    })
+    result = pd.DataFrame(
+        {
+            "PassengerId": test_ids,
+            "Transported": preds.astype(bool),
+        }
+    )
 
     return result

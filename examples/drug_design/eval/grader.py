@@ -40,7 +40,11 @@ class Grader(TaskGrader):
 
         try:
             result = _run_evaluation(
-                program_path, scorer_dir, data_dir, top_k, timeout,
+                program_path,
+                scorer_dir,
+                data_dir,
+                top_k,
+                timeout,
                 self.get_python_command(),
             )
         except TimeoutError:
@@ -99,8 +103,12 @@ class Grader(TaskGrader):
 
 
 def _run_evaluation(
-    program_path: str, scorer_dir: str, data_dir: str,
-    top_k: int, timeout: int, python_cmd: list[str],
+    program_path: str,
+    scorer_dir: str,
+    data_dir: str,
+    top_k: int,
+    timeout: int,
+    python_cmd: list[str],
 ) -> dict:
     import subprocess
 
@@ -322,7 +330,9 @@ def _run_evaluation(
     """)
     result = subprocess.run(
         [*python_cmd, "-c", script],
-        capture_output=True, text=True, timeout=timeout,
+        capture_output=True,
+        text=True,
+        timeout=timeout,
     )
     if result.returncode != 0:
         raise RuntimeError(result.stderr.strip()[-2000:])
@@ -339,4 +349,6 @@ def _run_evaluation(
                     return json.loads(line)
                 except json.JSONDecodeError:
                     continue
-        raise RuntimeError(f"No valid JSON.\nstdout: {stdout[-500:]}\nstderr: {result.stderr.strip()[-500:]}")
+        raise RuntimeError(
+            f"No valid JSON.\nstdout: {stdout[-500:]}\nstderr: {result.stderr.strip()[-500:]}"
+        )

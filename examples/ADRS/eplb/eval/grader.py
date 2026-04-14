@@ -43,6 +43,7 @@ class Grader(TaskGrader):
 
         try:
             import importlib.util
+
             spec = importlib.util.spec_from_file_location(
                 "eplb_evaluator", str(Path(eval_dir) / "evaluator.py")
             )

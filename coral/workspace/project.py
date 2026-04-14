@@ -26,12 +26,12 @@ logger = logging.getLogger(__name__)
 class ProjectPaths:
     """Paths created by create_project."""
 
-    results_dir: Path   # e.g. results/
-    task_dir: Path      # e.g. results/erdos-minimum-overlap-problem/
-    run_dir: Path       # e.g. results/erdos-minimum-overlap-problem/2026-03-11_163000/
-    coral_dir: Path     # run_dir/.coral/
-    agents_dir: Path    # run_dir/agents/
-    repo_dir: Path      # run_dir/repo/ (cloned per-run)
+    results_dir: Path  # e.g. results/
+    task_dir: Path  # e.g. results/erdos-minimum-overlap-problem/
+    run_dir: Path  # e.g. results/erdos-minimum-overlap-problem/2026-03-11_163000/
+    coral_dir: Path  # run_dir/.coral/
+    agents_dir: Path  # run_dir/agents/
+    repo_dir: Path  # run_dir/repo/ (cloned per-run)
 
 
 def slugify(name: str) -> str:

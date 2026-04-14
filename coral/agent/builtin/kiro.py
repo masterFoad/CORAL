@@ -58,7 +58,8 @@ class KiroRuntime:
             prompt = "Begin."
 
         cmd = [
-            "kiro-cli", "chat",
+            "kiro-cli",
+            "chat",
             prompt,
             "--no-interactive",
             "-a",  # trust all tools

@@ -49,7 +49,9 @@ logger = logging.getLogger(__name__)
 class AgentManager:
     """Manage the lifecycle of multiple CORAL agents."""
 
-    def __init__(self, config: CoralConfig, verbose: bool = False, config_dir: Path | None = None) -> None:
+    def __init__(
+        self, config: CoralConfig, verbose: bool = False, config_dir: Path | None = None
+    ) -> None:
         self.config = config
         self.config_dir = config_dir
         self.runtime: AgentRuntime = get_runtime(config.agents.runtime)
@@ -134,7 +136,8 @@ class AgentManager:
             # Generate default config at project root
             config_path = str(self.paths.run_dir / "litellm_config.yaml")
             generate_default_litellm_config(
-                Path(config_path), model=self.config.agents.model,
+                Path(config_path),
+                model=self.config.agents.model,
             )
         elif not Path(config_path).is_absolute():
             if self.config.task_dir:
@@ -157,7 +160,9 @@ class AgentManager:
         logger.info(f"Gateway running at {gateway.url}")
 
     def _run_warmstart_research(
-        self, warmstart: WarmStartRunner, agent_ids: list[str],
+        self,
+        warmstart: WarmStartRunner,
+        agent_ids: list[str],
     ) -> dict[str, str]:
         """Run the warm-start research phase. Returns {agent_id: session_id}."""
         assert self.paths is not None
@@ -199,7 +204,8 @@ class AgentManager:
         return sessions
 
     def _setup_and_start_agent(
-        self, agent_id: str,
+        self,
+        agent_id: str,
         resume_session_id: str | None = None,
         prompt: str | None = None,
         prompt_source: str | None = None,
@@ -211,7 +217,9 @@ class AgentManager:
         # Create worktree (idempotent)
         logger.info(f"Setting up {agent_id}...")
         worktree_path = create_agent_worktree(
-            self.paths.repo_dir, agent_id, self.paths.agents_dir,
+            self.paths.repo_dir,
+            agent_id,
+            self.paths.agents_dir,
         )
         logger.info(f"  Worktree: {worktree_path}")
 
@@ -239,21 +247,24 @@ class AgentManager:
         # Runtime-specific: write permission settings per worktree
         if shared_dir_name == ".claude":
             setup_claude_settings(
-                worktree_path, coral_dir=self.paths.coral_dir,
+                worktree_path,
+                coral_dir=self.paths.coral_dir,
                 research=self.config.agents.research,
                 gateway_url=gateway_url,
                 gateway_api_key=gateway_api_key,
             )
         elif shared_dir_name == ".opencode":
             setup_opencode_settings(
-                worktree_path, coral_dir=self.paths.coral_dir,
+                worktree_path,
+                coral_dir=self.paths.coral_dir,
                 research=self.config.agents.research,
                 gateway_url=gateway_url,
                 gateway_api_key=gateway_api_key,
             )
         elif shared_dir_name == ".codex":
             setup_codex_settings(
-                worktree_path, coral_dir=self.paths.coral_dir,
+                worktree_path,
+                coral_dir=self.paths.coral_dir,
                 research=self.config.agents.research,
                 gateway_url=gateway_url,
                 gateway_api_key=gateway_api_key,
@@ -261,7 +272,9 @@ class AgentManager:
 
         # Seed local heartbeat config from task YAML if not already present
         if not read_agent_heartbeat(self.paths.coral_dir, agent_id):
-            write_agent_heartbeat(self.paths.coral_dir, agent_id, default_local_actions(self.config))
+            write_agent_heartbeat(
+                self.paths.coral_dir, agent_id, default_local_actions(self.config)
+            )
             logger.info(f"  Seeded heartbeat config for {agent_id}")
 
         # Write agent ID
@@ -271,7 +284,8 @@ class AgentManager:
         instruction_file = self.runtime.instruction_filename
         single_agent = self.config.agents.count == 1
         coral_md = generate_coral_md(
-            self.config, agent_id,
+            self.config,
+            agent_id,
             single_agent=single_agent,
             shared_dir=shared_dir_name,
         )
@@ -297,7 +311,9 @@ class AgentManager:
         return handle
 
     def _restart_agent(
-        self, idx: int, prompt: str | None = None,
+        self,
+        idx: int,
+        prompt: str | None = None,
         prompt_source: str | None = None,
     ) -> AgentHandle:
         """Restart a dead agent, resuming its session with optional feedback prompt."""
@@ -320,12 +336,16 @@ class AgentManager:
             logger.info(f"Starting {agent_id} fresh (no session to resume)")
 
         return self._setup_and_start_agent(
-            agent_id, resume_session_id=session_id, prompt=prompt,
+            agent_id,
+            resume_session_id=session_id,
+            prompt=prompt,
             prompt_source=prompt_source or "restart",
         )
 
     def _interrupt_and_resume(
-        self, idx: int, prompt: str,
+        self,
+        idx: int,
+        prompt: str,
         prompt_source: str | None = None,
     ) -> AgentHandle:
         """Interrupt a running agent and resume with a feedback prompt."""
@@ -342,7 +362,9 @@ class AgentManager:
             logger.warning(f"No session_id for {agent_id}, starting fresh")
 
         return self._setup_and_start_agent(
-            agent_id, resume_session_id=session_id, prompt=prompt,
+            agent_id,
+            resume_session_id=session_id,
+            prompt=prompt,
             prompt_source=prompt_source,
         )
 
@@ -368,9 +390,7 @@ class AgentManager:
         if not paths.agents_dir.is_dir():
             raise RuntimeError(f"No agents directory found at {paths.agents_dir}")
 
-        agent_dirs = sorted(
-            d for d in paths.agents_dir.iterdir() if d.is_dir()
-        )
+        agent_dirs = sorted(d for d in paths.agents_dir.iterdir() if d.is_dir())
         if not agent_dirs:
             raise RuntimeError(f"No agent worktrees found in {paths.agents_dir}")
 
@@ -412,7 +432,9 @@ class AgentManager:
                 prompt = fresh_start_prompt
 
             handle = self._setup_and_start_agent(
-                agent_id, resume_session_id=session_id, prompt=prompt,
+                agent_id,
+                resume_session_id=session_id,
+                prompt=prompt,
             )
             handles.append(handle)
 
@@ -495,15 +517,17 @@ class AgentManager:
         """Get status of all agents."""
         statuses = []
         for handle in self.handles:
-            statuses.append({
-                "agent_id": handle.agent_id,
-                "alive": handle.alive,
-                "pid": handle.process.pid if handle.process else None,
-                "worktree": str(handle.worktree_path),
-                "log": str(handle.log_path),
-                "session_id": handle.session_id,
-                "restarts": self._restart_counts.get(handle.agent_id, 0),
-            })
+            statuses.append(
+                {
+                    "agent_id": handle.agent_id,
+                    "alive": handle.alive,
+                    "pid": handle.process.pid if handle.process else None,
+                    "worktree": str(handle.worktree_path),
+                    "log": str(handle.log_path),
+                    "session_id": handle.session_id,
+                    "restarts": self._restart_counts.get(handle.agent_id, 0),
+                }
+            )
         return statuses
 
     def _get_seen_attempts(self) -> set[str]:
@@ -558,20 +582,38 @@ class AgentManager:
         heartbeat_actions = []
         for ad in local_actions:
             prompt_template = ad.get("prompt") or DEFAULT_PROMPTS.get(ad["name"], "")
-            prompt = prompt_template.format(shared_dir=shared_dir, agent_id=agent_id) if prompt_template else ""
+            prompt = (
+                prompt_template.format(shared_dir=shared_dir, agent_id=agent_id)
+                if prompt_template
+                else ""
+            )
             trigger = ad.get("trigger") or DEFAULT_TRIGGER.get(ad["name"], "interval")
-            heartbeat_actions.append(HeartbeatAction(
-                name=ad["name"], every=ad["every"], prompt=prompt, is_global=False,
-                trigger=trigger,
-            ))
+            heartbeat_actions.append(
+                HeartbeatAction(
+                    name=ad["name"],
+                    every=ad["every"],
+                    prompt=prompt,
+                    is_global=False,
+                    trigger=trigger,
+                )
+            )
         for ad in global_actions:
             prompt_template = ad.get("prompt") or DEFAULT_PROMPTS.get(ad["name"], "")
-            prompt = prompt_template.format(shared_dir=shared_dir, agent_id=agent_id) if prompt_template else ""
+            prompt = (
+                prompt_template.format(shared_dir=shared_dir, agent_id=agent_id)
+                if prompt_template
+                else ""
+            )
             trigger = ad.get("trigger") or DEFAULT_TRIGGER.get(ad["name"], "interval")
-            heartbeat_actions.append(HeartbeatAction(
-                name=ad["name"], every=ad["every"], prompt=prompt, is_global=True,
-                trigger=trigger,
-            ))
+            heartbeat_actions.append(
+                HeartbeatAction(
+                    name=ad["name"],
+                    every=ad["every"],
+                    prompt=prompt,
+                    is_global=True,
+                    trigger=trigger,
+                )
+            )
         return HeartbeatRunner(heartbeat_actions)
 
     def _build_score_prompt(self, attempt: dict[str, Any], eval_count: int) -> str:
@@ -600,6 +642,7 @@ class AgentManager:
         feedback + reflection prompt. Otherwise, lets the agent continue; if it
         dies (max-turns), resumes with a score summary.
         """
+
         def _signal_handler(sig: int, frame: Any) -> None:
             if self._stopping:
                 # Second Ctrl+C: force immediate exit
@@ -720,10 +763,13 @@ class AgentManager:
                         f"interrupting {committing_agent_id}"
                     )
                     if self.verbose:
-                        print(f"\n[coral] Agent eval #{agent_eval_count}: score={attempt_data.get('score', '?')}")
+                        print(
+                            f"\n[coral] Agent eval #{agent_eval_count}: score={attempt_data.get('score', '?')}"
+                        )
                         print(f"[coral] Interrupting {committing_agent_id} for {names}...\n")
                     self.handles[committing_idx] = self._interrupt_and_resume(
-                        committing_idx, combined_prompt,
+                        committing_idx,
+                        combined_prompt,
                         prompt_source=f"heartbeat:{names}",
                     )
                     self._write_agent_pids()
@@ -743,8 +789,7 @@ class AgentManager:
                         prompt = None
 
                     logger.warning(
-                        f"Agent {handle.agent_id} exited (code: {exit_code}), "
-                        f"restart #{count}"
+                        f"Agent {handle.agent_id} exited (code: {exit_code}), restart #{count}"
                     )
                     if self.verbose:
                         print(f"[coral] {handle.agent_id} exited (code: {exit_code}), resuming...")
@@ -881,7 +926,8 @@ def _session_exists(session_id: str, coral_dir: Path | None = None) -> bool:
 
 
 def _validate_sessions(
-    sessions: dict[str, str], coral_dir: Path | None = None,
+    sessions: dict[str, str],
+    coral_dir: Path | None = None,
 ) -> dict[str, str]:
     """Filter saved sessions to only those that exist locally."""
     if not sessions:

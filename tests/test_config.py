@@ -255,9 +255,12 @@ def test_warmstart_dotlist_override():
     config = CoralConfig(
         task=TaskConfig(name="t", description="d"),
     )
-    merged = CoralConfig.merge_dotlist(config, [
-        "agents.warmstart.enabled=true",
-        "agents.warmstart.research_turns=10",
-    ])
+    merged = CoralConfig.merge_dotlist(
+        config,
+        [
+            "agents.warmstart.enabled=true",
+            "agents.warmstart.research_turns=10",
+        ],
+    )
     assert merged.agents.warmstart.enabled is True
     assert merged.agents.warmstart.research_turns == 10

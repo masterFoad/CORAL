@@ -99,9 +99,12 @@ class OpenCodeRuntime:
         # the provider's baseURL is patched in opencode.json to route through
         # the LiteLLM proxy.
         cmd = [
-            "opencode", "run",
-            "--model", model,
-            "--format", "json",
+            "opencode",
+            "run",
+            "--model",
+            model,
+            "--format",
+            "json",
         ]
 
         if resume_session_id:

@@ -17,7 +17,9 @@ from coral.hub.skills import list_skills, read_skill, get_skill_tree
 from coral.types import Attempt
 
 
-def _make_attempt(commit: str, agent: str = "agent-1", score: float = 0.5, title: str = "test") -> Attempt:
+def _make_attempt(
+    commit: str, agent: str = "agent-1", score: float = 0.5, title: str = "test"
+) -> Attempt:
     return Attempt(
         commit_hash=commit,
         agent_id=agent,

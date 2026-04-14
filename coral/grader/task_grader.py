@@ -119,9 +119,7 @@ class TaskGrader(ABC):
         stdout = result.stdout.strip()
         if not stdout:
             stderr_tail = result.stderr.strip()[-1000:]
-            raise RuntimeError(
-                f"Script produced no output on stdout.\nstderr: {stderr_tail}"
-            )
+            raise RuntimeError(f"Script produced no output on stdout.\nstderr: {stderr_tail}")
         # Try full stdout first
         try:
             return json.loads(stdout)
@@ -153,7 +151,10 @@ class TaskGrader(ABC):
         return Path(self.private_dir) / "eval" / relative_path
 
     def score(
-        self, value: float | None, explanation: str = "", feedback: str | None = None,
+        self,
+        value: float | None,
+        explanation: str = "",
+        feedback: str | None = None,
     ) -> ScoreBundle:
         """Return a single-score bundle."""
         return self.bundle(value, explanation, feedback=feedback)
@@ -163,7 +164,10 @@ class TaskGrader(ABC):
         return self.bundle(None, explanation, feedback=feedback)
 
     def bundle(
-        self, value: float | None, explanation: str = "", feedback: str | None = None,
+        self,
+        value: float | None,
+        explanation: str = "",
+        feedback: str | None = None,
     ) -> ScoreBundle:
         """Create a ScoreBundle from a score value and explanation."""
         s = Score(

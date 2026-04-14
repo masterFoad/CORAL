@@ -12,6 +12,7 @@ from typing import Any, Optional
 import torch.cuda
 
 from utils import set_seed
+
 try:
     from task import TestSpec
 except ImportError:
@@ -22,18 +23,18 @@ from reference import check_implementation, generate_input
 
 class PopcornOutput:
     def __init__(self, fd: int):
-        self.file = os.fdopen(fd, 'w')
+        self.file = os.fdopen(fd, "w")
         os.set_inheritable(fd, False)
-    
+
     def __enter__(self):
         return self
-    
+
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.file.close()
-    
+
     def print(self, *args, **kwargs):
         print(*args, **kwargs, file=self.file, flush=True)
-    
+
     def log(self, key, value):
         self.print(f"{key}: {value}")
 
@@ -52,7 +53,7 @@ def _combine(a: int, b: int) -> int:
     # so we need to make sure they don't provide any useful info for the full seed.
     # This Cantor construction ensures that if the secret seed is a large number,
     # then so is the overall seed.
-    return int(a + (a+b)*(a+b+1)//2)
+    return int(a + (a + b) * (a + b + 1) // 2)
 
 
 def get_test_cases(file_name: str, seed: Optional[int]) -> list[TestCase]:
@@ -114,12 +115,11 @@ def calculate_stats(durations: list[int]):
     worst = max(durations)
 
     avg = total / runs
-    variance = sum(map(lambda x: (x - avg)**2, durations))
+    variance = sum(map(lambda x: (x - avg) ** 2, durations))
     std = math.sqrt(variance / (runs - 1))
     err = std / math.sqrt(runs)
 
-    return Stats(runs=runs, mean=avg, std=std, err=err, best=float(best),
-                 worst=float(worst))
+    return Stats(runs=runs, mean=avg, std=std, err=err, best=float(best), worst=float(worst))
 
 
 def _clone_data(data):
@@ -154,6 +154,7 @@ def _run_single_test(test: TestCase):
     Runs a single test case. Do not call directly
     """
     from submission import custom_kernel
+
     data = generate_input(**test.args)
     torch.cuda.synchronize()
     submission_output = custom_kernel(_clone_data(data))
@@ -198,7 +199,9 @@ def run_testing(logger: PopcornOutput, pool: multiprocessing.Pool, tests: list[T
         return 112
 
 
-def _run_single_benchmark(test: TestCase, recheck: bool, max_repeats: int, max_time_ns: float) -> Stats | Any:
+def _run_single_benchmark(
+    test: TestCase, recheck: bool, max_repeats: int, max_time_ns: float
+) -> Stats | Any:
     """
     Runs one benchmark. Do not call directly.
     """
@@ -252,14 +255,19 @@ def _run_single_benchmark(test: TestCase, recheck: bool, max_repeats: int, max_t
             # a) relative error dips below 0.1%
             # b) we exceed the total time limit for benchmarking the kernel
             # c) we exceed 2 minutes of total wallclock time.
-            if stats.err / stats.mean < 0.001 or stats.mean * stats.runs > max_time_ns or total_bm_duration > 120e9:
+            if (
+                stats.err / stats.mean < 0.001
+                or stats.mean * stats.runs > max_time_ns
+                or total_bm_duration > 120e9
+            ):
                 break
 
     return calculate_stats(durations)
 
 
-def run_single_benchmark(pool: multiprocessing.Pool, test: TestCase, recheck: bool, max_repeats: int,
-                         max_time_ns: float):
+def run_single_benchmark(
+    pool: multiprocessing.Pool, test: TestCase, recheck: bool, max_repeats: int, max_time_ns: float
+):
     """
     For a particular test case, check correctness (if applicable) and grab runtime results.
 
@@ -312,6 +320,7 @@ def run_single_profile(test: TestCase) -> str:
     """
     from submission import custom_kernel
     from torch.profiler import profile, record_function, ProfilerActivity
+
     data = generate_input(**test.args)
     torch.cuda.synchronize()
 
@@ -326,7 +335,10 @@ def run_profiling(logger: PopcornOutput, tests: list[TestCase]):
     for idx, test in enumerate(tests):
         logger.log(f"benchmark.{idx}.spec", test.spec)
         report = run_single_profile(test)
-        logger.log(f"benchmark.{idx}.report", base64.b64encode(report.encode("utf-8"), b"+*").decode("utf-8"))
+        logger.log(
+            f"benchmark.{idx}.report",
+            base64.b64encode(report.encode("utf-8"), b"+*").decode("utf-8"),
+        )
     logger.log("check", "pass")
     return 0
 
@@ -348,7 +360,8 @@ def main():
 
     with PopcornOutput(int(fd)) as logger:
         import multiprocessing
-        mp_context = multiprocessing.get_context('spawn')
+
+        mp_context = multiprocessing.get_context("spawn")
         with mp_context.Pool(1) as pool:
             if mode == "test":
                 return run_testing(logger, pool, tests)

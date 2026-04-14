@@ -34,7 +34,7 @@ class AutocorrelationOptimizer:
 
         autoconv = np.convolve(f_non_negative, f_non_negative, mode="full") * self.dx
         max_conv = np.max(autoconv)
-        c1_ratio = max_conv / (integral_f ** 2)
+        c1_ratio = max_conv / (integral_f**2)
         return float(c1_ratio)
 
     def run_optimization(self):

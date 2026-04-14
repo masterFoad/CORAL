@@ -7,6 +7,7 @@ class Workload:
     """
     Constructor for taking in transactions and representing them as (read/write, key, position, txn_len)
     """
+
     def __init__(self, workload_json, debug=False, verify=False):
         self.workload = list(json.loads(workload_json).values())
         self.num_txns = len(self.workload)
@@ -162,9 +163,7 @@ class Workload:
                 if key in key_map:
                     key_start = 0
                     if key_map[key][-1][0] == "w" or op_type == "w":
-                        key_start = (
-                            key_map[key][-1][2] + 1
-                        )  # get end time of latest lock end
+                        key_start = key_map[key][-1][2] + 1  # get end time of latest lock end
                     else:
                         key_start = self.find_earliest_read(key, key_map, txn_id)
                         # key_start = key_map[key][-1][1] #pos # read locks shared
@@ -173,16 +172,12 @@ class Workload:
                     )  # place txn start behind conflicting locks
                     if self.debug:
                         print(key, key_start, pos, txn_start)
-                    max_release = max(
-                        max_release, key_start - 1
-                    )  # latest release of all locks
+                    max_release = max(max_release, key_start - 1)  # latest release of all locks
                 txn_total_len = txn_len
             txn_end = txn_start + txn_total_len - 1
             cost = txn_end - total_cost  # max_release
             # if max_release == 0:
-            if (
-                txn_end <= total_cost
-            ):  # in some cases, later txn in seq can finish first
+            if txn_end <= total_cost:  # in some cases, later txn in seq can finish first
                 cost = 0
             # else:
             #     cost = txn_end - total_cost
@@ -204,14 +199,10 @@ class Workload:
                 key_start = txn_start + pos - 1
                 if key in key_map:
                     if key_map[key][-1][0] == "w" or op_type == "w":
-                        self.insert_key_map(
-                            key, key_map, op_type, key_start, key_start, txn_id
-                        )
+                        self.insert_key_map(key, key_map, op_type, key_start, key_start, txn_id)
                         # key_map[key].append((op_type, key_start, key_start, txn_id))
                     else:
-                        self.insert_key_map(
-                            key, key_map, op_type, key_start, key_start, txn_id
-                        )
+                        self.insert_key_map(key, key_map, op_type, key_start, key_start, txn_id)
                         # key_map[key].append((op_type, key_start, key_start, txn_id))
                 else:
                     key_map[key] = [(op_type, key_start, key_start, txn_id)]
@@ -226,4 +217,3 @@ class Workload:
         # print(od.keys())
         # print(od.values())
         return total_cost
-

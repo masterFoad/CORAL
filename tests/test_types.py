@@ -21,10 +21,12 @@ def test_score_to_float():
 
 
 def test_score_bundle_aggregation():
-    bundle = ScoreBundle(scores={
-        "a": Score(value=0.8, name="a"),
-        "b": Score(value=0.6, name="b"),
-    })
+    bundle = ScoreBundle(
+        scores={
+            "a": Score(value=0.8, name="a"),
+            "b": Score(value=0.6, name="b"),
+        }
+    )
     agg = bundle.compute_aggregated()
     assert abs(agg - 0.7) < 1e-6
 

@@ -29,11 +29,7 @@ def get_device(use_cuda: bool = True) -> torch.device:
 # Adapted from https://github.com/linkedin/Liger-Kernel/blob/main/test/utils.py
 @torch.no_grad()
 def verbose_allclose(
-        received: torch.Tensor,
-        expected: torch.Tensor,
-        rtol=1e-05,
-        atol=1e-08,
-        max_print=5
+    received: torch.Tensor, expected: torch.Tensor, rtol=1e-05, atol=1e-08, max_print=5
 ) -> Tuple[bool, list[str]]:
     """
     Assert that two tensors are element-wise equal within a tolerance, providing detailed information about mismatches.
@@ -85,14 +81,18 @@ def verbose_allclose(
             i = tuple(index.tolist())
             mismatch_details.append(f"ERROR at {i}: {received[i]} {expected[i]}")
         if num_mismatched > max_print:
-            mismatch_details.append(f"... and {num_mismatched - max_print} more mismatched elements.")
+            mismatch_details.append(
+                f"... and {num_mismatched - max_print} more mismatched elements."
+            )
         return False, mismatch_details
 
     return True, [f"Maximum error: {torch.max(diff)}"]
 
 
 @torch.no_grad()
-def verbose_allequal(received: torch.Tensor, expected: torch.Tensor, max_print: int = 5) -> Tuple[bool, list[str]]:
+def verbose_allequal(
+    received: torch.Tensor, expected: torch.Tensor, max_print: int = 5
+) -> Tuple[bool, list[str]]:
     """
     Assert that two tensors are element-wise perfectly equal, providing detailed information about mismatches.
 
@@ -118,7 +118,9 @@ def verbose_allequal(received: torch.Tensor, expected: torch.Tensor, max_print: 
             i = tuple(index.tolist())
             mismatch_details.append(f"ERROR at {i}: {received[i]} {expected[i]}")
         if num_mismatched > max_print:
-            mismatch_details.append(f"... and {num_mismatched - max_print} more mismatched elements.")
+            mismatch_details.append(
+                f"... and {num_mismatched - max_print} more mismatched elements."
+            )
         return False, mismatch_details
 
     return True, []
@@ -134,12 +136,13 @@ def match_reference(data, output, reference: callable, rtol=1e-05, atol=1e-08):
     if len(reasons) > 0:
         return good, "\\n".join(reasons)
 
-    return good, ''
+    return good, ""
 
 
 def make_match_reference(reference: callable, **kwargs):
     def wrapped(data, output):
         return match_reference(data, output, reference=reference, **kwargs)
+
     return wrapped
 
 
@@ -157,6 +160,7 @@ class DisableCuDNNTF32:
     def __exit__(self, exc_type, exc_value, traceback):
         torch.backends.cudnn.allow_tf32 = self.allow_tf32
         torch.backends.cudnn.deterministic = self.deterministic
+
 
 def clear_l2_cache():
     # import cupy as cp

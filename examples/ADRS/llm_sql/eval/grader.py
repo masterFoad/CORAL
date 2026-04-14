@@ -61,10 +61,14 @@ class Grader(TaskGrader):
             runtime = result.get("total_runtime", 0.0)
 
             explanation = (
-                f"combined={combined_score:.4f} | "
-                f"avg_hit_rate={sum(hit_rates)/len(hit_rates):.4f} | "
-                f"total_runtime={runtime:.2f}s"
-            ) if hit_rates else f"combined={combined_score:.4f}"
+                (
+                    f"combined={combined_score:.4f} | "
+                    f"avg_hit_rate={sum(hit_rates) / len(hit_rates):.4f} | "
+                    f"total_runtime={runtime:.2f}s"
+                )
+                if hit_rates
+                else f"combined={combined_score:.4f}"
+            )
             return self.score(combined_score, explanation)
 
         except Exception as e:

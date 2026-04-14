@@ -41,9 +41,9 @@ class ErdosOptimizer:
         j = 1.0 - h
         h_padded = jnp.pad(h, (0, N))
         j_padded = jnp.pad(j, (0, N))
-        correlation = jnp.fft.ifft(
-            jnp.fft.fft(h_padded) * jnp.conj(jnp.fft.fft(j_padded))
-        ).real * self.dx
+        correlation = (
+            jnp.fft.ifft(jnp.fft.fft(h_padded) * jnp.conj(jnp.fft.fft(j_padded))).real * self.dx
+        )
         objective = jnp.max(correlation)
 
         # Penalize deviation from ∫h = 1
@@ -76,9 +76,9 @@ class ErdosOptimizer:
         j = 1.0 - h
         h_padded = jnp.pad(h, (0, N))
         j_padded = jnp.pad(j, (0, N))
-        correlation = jnp.fft.ifft(
-            jnp.fft.fft(h_padded) * jnp.conj(jnp.fft.fft(j_padded))
-        ).real * self.dx
+        correlation = (
+            jnp.fft.ifft(jnp.fft.fft(h_padded) * jnp.conj(jnp.fft.fft(j_padded))).real * self.dx
+        )
         c5_bound = float(jnp.max(correlation))
 
         return np.array(h), c5_bound

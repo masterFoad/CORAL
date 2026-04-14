@@ -263,7 +263,9 @@ Run 'coral <command> --help' for details on any command."""
     # Hidden alias: attempt -> show
     p_attempt_alias = sub.add_parser("attempt", help=argparse.SUPPRESS)
     p_attempt_alias.add_argument("hash", help=argparse.SUPPRESS)
-    p_attempt_alias.add_argument("--diff", action="store_true", default=False, help=argparse.SUPPRESS)
+    p_attempt_alias.add_argument(
+        "--diff", action="store_true", default=False, help=argparse.SUPPRESS
+    )
     _add_run_args(p_attempt_alias)
 
     p_notes = sub.add_parser(
@@ -282,7 +284,9 @@ Run 'coral <command> --help' for details on any command."""
     p_notes.add_argument("--search", "-s", help="Search notes by keyword")
     p_notes.add_argument("-n", "--recent", type=int, help="Show N most recent")
     p_notes.add_argument("--read", "-r", help="Read a specific note by number or name")
-    p_notes.add_argument("--history", action="store_true", help="Show shared state checkpoint history")
+    p_notes.add_argument(
+        "--history", action="store_true", help="Show shared state checkpoint history"
+    )
     p_notes.add_argument("--diff", metavar="HASH", help="Show diff for a checkpoint commit")
     _add_run_args(p_notes)
 
@@ -391,7 +395,12 @@ Run 'coral <command> --help' for details on any command."""
 
     hb_set = hb_sub.add_parser("set", help="Add or update a heartbeat action")
     hb_set.add_argument("name", help="Action name (e.g. reflect, consolidate)")
-    hb_set.add_argument("--every", type=int, required=True, help="Trigger every N evals (or stall threshold for plateau)")
+    hb_set.add_argument(
+        "--every",
+        type=int,
+        required=True,
+        help="Trigger every N evals (or stall threshold for plateau)",
+    )
     hb_set.add_argument("--prompt", help="Prompt text (required for custom actions)")
     hb_set.add_argument(
         "--trigger",

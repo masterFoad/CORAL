@@ -4,6 +4,7 @@ import json
 from broadcast import *
 from utils import *
 
+
 class BCSimulator:
     # Default variables
     data_vol: float = 4.0  # size of data to be sent to multiple dsts
@@ -75,9 +76,9 @@ class BCSimulator:
             print("--")
             print(path)
             for i in range(len(path) - 1):
-                print(f"Flow: {self.g[path[i]][path[i+1]]['flow']}")
-                print(f"Actual throughput: {round(self.g[path[i]][path[i+1]]['throughput'], 4)}")
-                print(f"Cost: {self.g[path[i]][path[i+1]]['cost']}\n")
+                print(f"Flow: {self.g[path[i]][path[i + 1]]['flow']}")
+                print(f"Actual throughput: {round(self.g[path[i]][path[i + 1]]['throughput'], 4)}")
+                print(f"Cost: {self.g[path[i]][path[i + 1]]['cost']}\n")
 
         # evaluate transfer time and total cost
         max_t, avg_t, last_dst = self.__transfer_time()
@@ -110,7 +111,9 @@ class BCSimulator:
                     if not g.has_edge(src, dst):
                         cost = edge_data["cost"]
                         throughput = edge_data["throughput"]  # * self.default_vms_per_region
-                        g.add_edge(src, dst, throughput=throughput, cost=edge_data["cost"], flow=throughput)
+                        g.add_edge(
+                            src, dst, throughput=throughput, cost=edge_data["cost"], flow=throughput
+                        )
                         g[src][dst]["partitions"] = set()
                     g[src][dst]["partitions"].add(partition_id)
 
@@ -133,7 +136,9 @@ class BCSimulator:
                     # or assign based on num of incoming flows
                     flow_proportion = 1 / len(list(in_edges))
 
-                    g[src][dst]["flow"] = min(g[src][dst]["flow"], self.ingress_limits[provider] * flow_proportion)
+                    g[src][dst]["flow"] = min(
+                        g[src][dst]["flow"], self.ingress_limits[provider] * flow_proportion
+                    )
 
             if out_flow_sum > self.egress_limits[provider]:
                 # print("\nExceed egress limit")
@@ -147,12 +152,16 @@ class BCSimulator:
                     flow_proportion = 1 / len(list(out_edges))
 
                     print(f"src: {src}, dst: {dst}, flow proportion: {flow_proportion}")
-                    g[src][dst]["flow"] = min(g[src][dst]["flow"], self.egress_limits[provider] * flow_proportion)
+                    g[src][dst]["flow"] = min(
+                        g[src][dst]["flow"], self.egress_limits[provider] * flow_proportion
+                    )
 
         return g
 
     def __get_path(self):
-        all_paths = [path for node in self.dsts for path in nx.all_simple_paths(self.g, self.src, node)]
+        all_paths = [
+            path for node in self.dsts for path in nx.all_simple_paths(self.g, self.src, node)
+        ]
         return all_paths
 
     def __slowest_capacity_link(self):

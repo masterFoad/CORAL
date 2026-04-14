@@ -43,9 +43,7 @@ def get_runtime(name: str) -> AgentRuntime:
     cls = _RUNTIMES.get(canonical)
     if cls is None:
         available = sorted(set(list(_RUNTIMES.keys()) + list(_ALIASES.keys())))
-        raise ValueError(
-            f"Unknown runtime {name!r}. Available: {', '.join(available)}"
-        )
+        raise ValueError(f"Unknown runtime {name!r}. Available: {', '.join(available)}")
     return cls()
 
 

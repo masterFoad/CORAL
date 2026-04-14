@@ -29,7 +29,7 @@ def load_grader(config: CoralConfig, coral_dir: str | Path) -> Any:
 
     if not grader_path.exists():
         # Fallback: load builtin grader by type name
-        return _load_legacy_grader(config)
+        return _load_legacy_grader(config, private_dir)
 
     # Import grader.py dynamically
     spec = importlib.util.spec_from_file_location("task_grader", str(grader_path))
@@ -51,10 +51,7 @@ def load_grader(config: CoralConfig, coral_dir: str | Path) -> Any:
     from coral.grader.task_grader import TaskGrader
 
     if not issubclass(grader_cls, TaskGrader):
-        raise TypeError(
-            f"Grader class must inherit from TaskGrader, "
-            f"got {grader_cls.__bases__}"
-        )
+        raise TypeError(f"Grader class must inherit from TaskGrader, got {grader_cls.__bases__}")
 
     # Instantiate with grader config
     grader = grader_cls(config=config.grader)
@@ -64,7 +61,7 @@ def load_grader(config: CoralConfig, coral_dir: str | Path) -> Any:
     return grader
 
 
-def _load_legacy_grader(config: CoralConfig) -> Any:
+def _load_legacy_grader(config: CoralConfig, private_dir: Path | None = None) -> Any:
     """Legacy grader loading for backward compatibility (function grader only)."""
     grader_type = config.grader.type
 
@@ -75,7 +72,24 @@ def _load_legacy_grader(config: CoralConfig) -> Any:
         mod = importlib.import_module(module_path)
         func = getattr(mod, config.grader.args.get("func_name", "grade"))
         from coral.grader.builtin.function_grader import FunctionGrader
+
         return FunctionGrader(name="eval", func=func)
+
+    elif grader_type == "llm":
+        from coral.grader.builtin.llm_grader import LLMGrader
+
+        grader = LLMGrader(config=config.grader)
+        if private_dir:
+            grader.private_dir = str(private_dir)
+        return grader
+
+    elif grader_type == "agent":
+        from coral.grader.builtin.agent_grader import AgentGrader
+
+        grader = AgentGrader(config=config.grader)
+        if private_dir:
+            grader.private_dir = str(private_dir)
+        return grader
 
     elif grader_type and config.grader.module:
         # Generic module-based loading

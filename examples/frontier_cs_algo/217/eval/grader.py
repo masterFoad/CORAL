@@ -34,7 +34,9 @@ class Grader(TaskGrader):
 
         evaluator = SingleEvaluator(register_cleanup=False)
         result = evaluator.evaluate(
-            "algorithmic", problem_id=problem_id, code=code,
+            "algorithmic",
+            problem_id=problem_id,
+            code=code,
         )
 
         if not result.success:
